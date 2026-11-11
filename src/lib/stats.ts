@@ -1,0 +1,102 @@
+import { and, count, countDistinct, desc, eq, isNotNull, sql } from 'drizzle-orm';
+import { db } from '@/db';
+import { bookings, requests, reviews, users } from '@/db/schema';
+
+export type HelperStats = { completed: number; reviewCount: number; average: number | null };
+
+const EMPTY: HelperStats = { completed: 0, reviewCount: 0, average: null };
+
+/** Interventions effectuées et note moyenne de chaque aidant. */
+export async function allHelperStats(): Promise<Map<number, HelperStats>> {
+  const [done, rated] = await Promise.all([
+    db
+      .select({ helperId: bookings.helperId, n: count() })
+      .from(bookings)
+      .where(eq(bookings.status, 'completed'))
+      .groupBy(bookings.helperId),
+    db
+      .select({ helperId: reviews.helperId, n: count(), average: sql<number>`avg(${reviews.rating})` })
+      .from(reviews)
+      .groupBy(reviews.helperId),
+  ]);
+
+  const stats = new Map<number, HelperStats>();
+  for (const row of done) stats.set(row.helperId, { ...EMPTY, completed: row.n });
+  for (const row of rated) {
+    stats.set(row.helperId, {
+      ...(stats.get(row.helperId) ?? EMPTY),
+      reviewCount: row.n,
+      average: Number(row.average),
+    });
+  }
+  return stats;
+}
+
+export async function helperStats(helperId: number): Promise<HelperStats> {
+  return (await allHelperStats()).get(helperId) ?? EMPTY;
+}
+
+/** Aidants les plus actifs : d'abord le nombre d'interventions, puis la note moyenne. */
+export async function topHelpers(limit: number) {
+  const [stats, helpers] = await Promise.all([
+    allHelperStats(),
+    db.query.users.findMany({
+      where: eq(users.role, 'helper'),
+      columns: { id: true, firstName: true, lastName: true, neighborhood: true, city: true, skills: true, bio: true },
+    }),
+  ]);
+
+  return helpers
+    .map((helper) => ({ ...helper, stats: stats.get(helper.id) ?? EMPTY }))
+    .filter((helper) => helper.stats.completed > 0)
+    .sort((a, b) => b.stats.completed - a.stats.completed || (b.stats.average ?? 0) - (a.stats.average ?? 0))
+    .slice(0, limit);
+}
+
+/** Derniers avis accompagnés d'un commentaire. */
+export function latestReviews(limit: number) {
+  return db.query.reviews.findMany({
+    where: isNotNull(reviews.comment),
+    with: {
+      author: { columns: { firstName: true, lastName: true, neighborhood: true } },
+      helper: { columns: { firstName: true, lastName: true } },
+      booking: { with: { request: { columns: { title: true, category: true } } } },
+    },
+    orderBy: desc(reviews.createdAt),
+    limit,
+  });
+}
+
+/** Chiffres clés affichés sur la page d'accueil. */
+export async function communityStats() {
+  const [[members], [done], [rating], [areas]] = await Promise.all([
+    db.select({ n: count() }).from(users),
+    db.select({ n: count() }).from(bookings).where(eq(bookings.status, 'completed')),
+    db.select({ n: count(), average: sql<number | null>`avg(${reviews.rating})` }).from(reviews),
+    db.select({ n: countDistinct(users.neighborhood) }).from(users),
+  ]);
+  return {
+    members: members.n,
+    completed: done.n,
+    reviewCount: rating.n,
+    average: rating.average === null ? null : Number(rating.average),
+    neighborhoods: areas.n,
+  };
+}
+
+/** Dernières demandes ouvertes, sans aucune information personnelle (page publique). */
+export function latestOpenRequests(limit: number) {
+  return db
+    .select({
+      id: requests.id,
+      title: requests.title,
+      category: requests.category,
+      neighborhood: requests.neighborhood,
+      city: requests.city,
+      createdAt: requests.createdAt,
+    })
+    .from(requests)
+    .where(and(eq(requests.status, 'open')))
+    .orderBy(desc(requests.createdAt))
+    .limit(limit);
+}
