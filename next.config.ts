@@ -9,6 +9,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Les avis peuvent contenir jusqu'à 3 photos de 900 Ko (déjà réduites dans le navigateur).
+  experimental: { serverActions: { bodySizeLimit: '4mb' } },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

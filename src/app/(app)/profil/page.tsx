@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { ProfileForm } from '@/components/ProfileForm';
 import { formatRating, Stars } from '@/components/ui';
 import { requireUser } from '@/lib/auth';
@@ -62,6 +63,11 @@ export default async function ProfilePage() {
             {next
               ? `Encore ${next.remaining} ${next.remaining > 1 ? 'interventions' : 'intervention'} pour devenir « ${next.grade.name} » ${next.grade.icon}`
               : 'Vous avez atteint le plus haut grade. Bravo et merci !'}
+          </p>
+          <p className="mt-4">
+            <Link href={`/aidants/${user.id}`} className="btn btn-secondary">
+              Voir mon profil public et mes avis
+            </Link>
           </p>
         </section>
       )}

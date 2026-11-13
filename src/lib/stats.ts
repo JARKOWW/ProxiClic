@@ -59,12 +59,50 @@ export function latestReviews(limit: number) {
     where: isNotNull(reviews.comment),
     with: {
       author: { columns: { firstName: true, lastName: true, neighborhood: true } },
-      helper: { columns: { firstName: true, lastName: true } },
+      helper: { columns: { id: true, firstName: true, lastName: true } },
+      photos: { columns: { id: true } },
       booking: { with: { request: { columns: { title: true, category: true } } } },
     },
     orderBy: desc(reviews.createdAt),
     limit,
   });
+}
+
+/**
+ * Profil public d'un aidant : uniquement ce que les autres membres ont le droit de voir
+ * (ni e-mail, ni téléphone, ni nom complet), avec tous ses avis.
+ */
+export async function helperProfile(helperId: number) {
+  const helper = await db.query.users.findFirst({
+    where: and(eq(users.id, helperId), eq(users.role, 'helper')),
+    columns: { id: true, firstName: true, lastName: true, neighborhood: true, city: true, bio: true, skills: true, createdAt: true },
+  });
+  if (!helper) return null;
+
+  const [stats, reviewRows] = await Promise.all([
+    helperStats(helperId),
+    db.query.reviews.findMany({
+      where: eq(reviews.helperId, helperId),
+      with: {
+        author: { columns: { firstName: true, lastName: true, neighborhood: true } },
+        photos: { columns: { id: true } },
+        booking: { with: { request: { columns: { title: true, category: true } } } },
+      },
+      orderBy: desc(reviews.createdAt),
+    }),
+  ]);
+
+  // Répartition des notes (5 → 1 étoile) et nombre de fois où chaque compliment a été reçu.
+  const distribution = [5, 4, 3, 2, 1].map((stars) => ({
+    stars,
+    count: reviewRows.filter((review) => review.rating === stars).length,
+  }));
+  const tagCounts = new Map<string, number>();
+  for (const review of reviewRows) {
+    for (const tag of review.tags?.split(',') ?? []) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  }
+
+  return { helper, stats, reviews: reviewRows, distribution, tagCounts };
 }
 
 /** Chiffres clés affichés sur la page d'accueil. */

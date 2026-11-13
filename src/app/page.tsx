@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Footer, Header } from '@/components/Header';
-import { formatRating, Stars } from '@/components/ui';
+import { PhotoGallery } from '@/components/PhotoGallery';
+import { formatRating, ReviewTags, Stars } from '@/components/ui';
 import { getCurrentUser, homeFor } from '@/lib/auth';
 import { CATEGORIES, CATEGORY_KEYS } from '@/lib/constants';
 import { displayName, formatRelative } from '@/lib/format';
@@ -308,6 +309,15 @@ export default async function HomePage() {
                   {helper.skills && (
                     <p className={`mt-4 text-sm ${index === 0 ? 'text-brand-100' : 'text-ink-soft'}`}>{helper.skills}</p>
                   )}
+                  <p className="mt-5">
+                    <Link
+                      href={`/aidants/${helper.id}`}
+                      className={`font-bold underline underline-offset-4 ${index === 0 ? 'text-white' : 'text-brand-700 hover:text-brand-900'}`}
+                    >
+                      Voir le profil et les avis<span className="sr-only"> de {displayName(helper)}</span>{' '}
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  </p>
                 </li>
               ))}
             </ol>
@@ -390,6 +400,16 @@ export default async function HomePage() {
                       <span className="opacity-40">{'★'.repeat(5 - review.rating)}</span>
                     </span>
                     <blockquote className="relative mt-4 text-lg">{review.comment}</blockquote>
+                    {review.tags && (
+                      <div className="relative mt-4">
+                        <ReviewTags tags={review.tags} onDark={featured} />
+                      </div>
+                    )}
+                    {review.photos.length > 0 && (
+                      <div className="relative mt-4">
+                        <PhotoGallery photos={review.photos} label={`Photos de l’avis de ${displayName(review.author)}`} />
+                      </div>
+                    )}
                     <div className="mt-5 flex items-center gap-3">
                       <span
                         aria-hidden="true"
@@ -403,7 +423,10 @@ export default async function HomePage() {
                         <strong>{displayName(review.author)}</strong>
                         <span className={featured ? 'text-brand-100' : 'text-ink-soft'}> · {review.author.neighborhood}</span>
                         <span className={`block text-sm ${featured ? 'text-brand-100' : 'text-ink-soft'}`}>
-                          Aidé(e) par {displayName(review.helper)}
+                          Aidé(e) par{' '}
+                          <Link href={`/aidants/${review.helper.id}`} className="font-bold underline underline-offset-4">
+                            {displayName(review.helper)}
+                          </Link>
                         </span>
                       </p>
                     </div>

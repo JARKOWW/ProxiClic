@@ -2,10 +2,13 @@ import {
   BOOKING_STATUS_LABELS,
   CATEGORIES,
   REQUEST_STATUS_LABELS,
+  REVIEW_TAGS,
   type BookingStatus,
   type Category,
   type RequestStatus,
 } from '@/lib/constants';
+import { formatDate } from '@/lib/format';
+import { parseTags } from '@/lib/photos';
 
 const TONES = {
   ok: 'bg-ok-bg text-ok-ink',
@@ -71,6 +74,43 @@ export function GradeBadge({ grade }: { grade: { name: string; icon: string } })
       <span aria-hidden="true">{grade.icon}</span>
       {grade.name}
     </span>
+  );
+}
+
+/** Compliments cochés dans un avis. `count` affiche le nombre de fois où chacun a été reçu. */
+export function ReviewTags({ tags, counts, onDark }: { tags: string | null; counts?: Map<string, number>; onDark?: boolean }) {
+  const list = parseTags(tags);
+  if (list.length === 0) return null;
+  return (
+    <ul className="flex flex-wrap gap-2" aria-label="Compliments">
+      {list.map((tag) => (
+        <li key={tag} className={`badge ${onDark ? 'text-brand-900 bg-white' : 'bg-ok-bg text-ok-ink'}`}>
+          <span aria-hidden="true">{REVIEW_TAGS[tag].icon}</span>
+          {REVIEW_TAGS[tag].label}
+          {counts?.has(tag) && (
+            <span>
+              <span aria-hidden="true">× </span>
+              {counts.get(tag)}
+              <span className="sr-only"> fois</span>
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Réponse de l'aidant affichée sous un avis. */
+export function ReviewReply({ title, reply, repliedAt }: { title: string; reply: string; repliedAt: Date | null }) {
+  return (
+    <div className="border-brand-200 mt-4 border-l-4 pl-4">
+      <p className="text-sm font-bold">
+        <span aria-hidden="true">↩ </span>
+        {title}
+        {repliedAt && <span className="text-ink-soft font-normal"> · le {formatDate(repliedAt)}</span>}
+      </p>
+      <p className="mt-1 whitespace-pre-wrap">{reply}</p>
+    </div>
   );
 }
 

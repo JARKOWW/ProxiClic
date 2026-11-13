@@ -188,6 +188,11 @@ export default async function RequestDetailPage({ params, searchParams }: Props)
                     {booking.helper.skills && ` · ${booking.helper.skills}`}
                   </p>
                   {booking.helper.bio && <p className="mt-3">{booking.helper.bio}</p>}
+                  <p className="mt-3">
+                    <Link href={`/aidants/${booking.helperId}`} className="link">
+                      Voir le profil et les avis<span className="sr-only"> de {displayName(booking.helper)}</span>
+                    </Link>
+                  </p>
                   <p className="bg-brand-50 mt-4 rounded-xl p-4 text-lg">
                     <span aria-hidden="true">📅 </span>
                     <strong className="capitalize">{formatDateTime(booking.scheduledAt)}</strong> ·{' '}

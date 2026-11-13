@@ -77,3 +77,22 @@ export const TIME_SLOTS = {
   'Après-midi': ['14:00', '15:00', '16:00', '17:00'],
   Soir: ['18:00', '19:00'],
 } as const;
+
+/** Compliments à cocher dans un avis : plus rapide à remplir qu'un long commentaire. */
+export const REVIEW_TAG_KEYS = ['patient', 'pedagogue', 'ponctuel', 'efficace', 'souriant', 'soigneux'] as const;
+export type ReviewTag = (typeof REVIEW_TAG_KEYS)[number];
+
+export const REVIEW_TAGS: Record<ReviewTag, { label: string; icon: string }> = {
+  patient: { label: 'Patient', icon: '🧘' },
+  pedagogue: { label: 'Explications claires', icon: '🎓' },
+  ponctuel: { label: 'Ponctuel', icon: '⏰' },
+  efficace: { label: 'Efficace', icon: '⚡' },
+  souriant: { label: 'Souriant', icon: '😊' },
+  soigneux: { label: 'Soigneux', icon: '🧹' },
+};
+
+/** Photos jointes à un avis. Elles sont réduites dans le navigateur avant l'envoi. */
+export const REVIEW_PHOTO_MAX_COUNT = 3;
+export const REVIEW_PHOTO_MAX_BYTES = 900_000;
+/** Plus grand côté, en pixels, après réduction dans le navigateur. */
+export const REVIEW_PHOTO_MAX_SIDE = 1600;

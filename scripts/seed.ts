@@ -1,4 +1,5 @@
 import './load-env';
+import { readFileSync } from 'node:fs';
 import bcrypt from 'bcryptjs';
 import { parisToDate } from '../src/lib/format';
 import type { BookingStatus, Category, RequestStatus } from '../src/lib/constants';
@@ -19,9 +20,10 @@ function parisDay(offsetDays: number, time: string): Date {
 
 async function main() {
   const { db, client, schema } = await import('../src/db');
-  const { users, requests, bookings, conversations, messages, reviews } = schema;
+  const { users, requests, bookings, conversations, messages, reviews, reviewPhotos } = schema;
 
   // On repart d'une base vide (l'ordre respecte les clés étrangères).
+  await db.delete(reviewPhotos);
   await db.delete(reviews);
   await db.delete(messages);
   await db.delete(conversations);
@@ -328,8 +330,42 @@ async function main() {
     });
   }
 
+  // Compliments, réponse de l'aidant et photos de certains avis, repérés par le titre de la demande.
+  // Les images de scripts/seed-photos/ sont des illustrations fictives créées pour la démonstration.
+  const reviewExtras: Record<string, { tags?: string; reply?: string; photos?: string[] }> = {
+    'Installer un antivirus sur mon ordinateur': {
+      tags: 'patient,pedagogue',
+      photos: ['antivirus'],
+      reply: 'Merci Monique ! N’hésitez pas à me faire signe si l’antivirus vous affiche un message que vous ne comprenez pas.',
+    },
+    'Mon imprimante n’imprime plus en couleur': {
+      tags: 'ponctuel,efficace',
+      photos: ['imprimante-couleur'],
+      reply: 'Avec plaisir André. Pensez à lancer une impression par semaine pour éviter que les buses ne sèchent.',
+    },
+    'Envoyer des photos en pièce jointe': { tags: 'pedagogue' },
+    'Transférer mes documents sur un nouvel ordinateur': { tags: 'efficace,soigneux' },
+    'Prendre rendez-vous en ligne chez le médecin': { tags: 'patient,pedagogue' },
+    'Régler la taille du texte sur mon téléphone': {
+      tags: 'souriant,patient',
+      photos: ['taille-texte'],
+      reply: 'Ravie d’avoir pu vous aider Françoise, profitez bien de vos messages !',
+    },
+    'Installer l’application de ma banque': { tags: 'pedagogue,soigneux' },
+    'Faire des appels vidéo avec ma sœur': { tags: 'souriant' },
+    'Sauvegarder mes contacts': { tags: 'efficace' },
+    'Installer un répéteur Wi-Fi dans le garage': { tags: 'efficace,soigneux', photos: ['wifi-garage'] },
+    'Retrouver les chaînes de ma télévision': { tags: 'efficace,souriant', photos: ['chaines-tv'] },
+    'Changer le mot de passe du Wi-Fi': { tags: 'ponctuel,efficace,soigneux' },
+    'Créer mon compte Ameli': { tags: 'patient,pedagogue' },
+    'Télécharger des livres sur ma liseuse': { tags: 'souriant' },
+    'Vérifier que mon ordinateur n’a pas de virus': { tags: 'efficace,pedagogue' },
+    'Trier ma boîte mail et bloquer les messages indésirables': { tags: 'patient,pedagogue', photos: ['messagerie-rangee'] },
+  };
+
   let bookingCount = 0;
   let reviewCount = 0;
+  let photoCount = 0;
   let messageCount = 0;
 
   for (const r of requestRows) {
@@ -364,15 +400,31 @@ async function main() {
       bookingCount += 1;
 
       if (p.review) {
-        await db.insert(reviews).values({
-          bookingId: booking.id,
-          authorId: userId[r.client],
-          helperId: userId[p.helper],
-          rating: p.review.rating,
-          comment: p.review.comment,
-          createdAt: p.review.at,
-        });
+        const extras = reviewExtras[r.title] ?? {};
+        const [review] = await db
+          .insert(reviews)
+          .values({
+            bookingId: booking.id,
+            authorId: userId[r.client],
+            helperId: userId[p.helper],
+            rating: p.review.rating,
+            comment: p.review.comment,
+            tags: extras.tags ?? null,
+            reply: extras.reply ?? null,
+            repliedAt: extras.reply ? new Date(p.review.at.getTime() + 5 * HOUR) : null,
+            createdAt: p.review.at,
+          })
+          .returning({ id: reviews.id });
         reviewCount += 1;
+        for (const name of extras.photos ?? []) {
+          await db.insert(reviewPhotos).values({
+            reviewId: review.id,
+            mime: 'image/jpeg',
+            data: readFileSync(new URL(`./seed-photos/${name}.jpg`, import.meta.url)),
+            createdAt: p.review.at,
+          });
+          photoCount += 1;
+        }
       }
       if (p.messages.length === 0) continue;
 
@@ -397,7 +449,7 @@ async function main() {
   client.close();
 
   console.log(
-    `✔ Données de démonstration insérées : ${userRows.length} membres, ${requestRows.length} demandes, ${bookingCount} rendez-vous, ${reviewCount} avis, ${messageCount} messages.`,
+    `✔ Données de démonstration insérées : ${userRows.length} membres, ${requestRows.length} demandes, ${bookingCount} rendez-vous, ${reviewCount} avis (${photoCount} photos), ${messageCount} messages.`,
   );
   console.log('\nComptes de démonstration (mot de passe : %s)', DEMO_PASSWORD);
   console.log('  Demandeuse : monique.durand@example.fr');

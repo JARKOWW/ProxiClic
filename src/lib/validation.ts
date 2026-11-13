@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CATEGORY_KEYS, DURATIONS, ROLES } from './constants';
+import { CATEGORY_KEYS, DURATIONS, REVIEW_TAG_KEYS, ROLES } from './constants';
 
 /** État renvoyé par les actions serveur aux formulaires. */
 export type FormState =
@@ -123,6 +123,16 @@ export const reviewSchema = z.object({
     .min(1, 'Veuillez choisir une note entre 1 et 5 étoiles.')
     .max(5, 'Veuillez choisir une note entre 1 et 5 étoiles.'),
   comment: optionalText('Le commentaire', 600),
+  /** Compliments cochés, enregistrés sous forme de clés séparées par des virgules. */
+  tags: z
+    .array(z.enum(REVIEW_TAG_KEYS, { error: 'Ce compliment est inconnu.' }))
+    .max(REVIEW_TAG_KEYS.length)
+    .default([])
+    .transform((tags) => (tags.length ? [...new Set(tags)].join(',') : null)),
+});
+
+export const replySchema = z.object({
+  reply: requiredText('La réponse', 2, 600),
 });
 
 export const idSchema = z.coerce.number().int().positive();

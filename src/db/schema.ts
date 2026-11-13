@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { blob, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { BOOKING_STATUSES, CATEGORY_KEYS, REQUEST_STATUSES, ROLES } from '../lib/constants';
 
 const createdAt = () =>
@@ -117,15 +117,43 @@ export const reviews = sqliteTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     rating: integer('rating').notNull(),
     comment: text('comment'),
+    /** Compliments cochés par l'auteur : clés de REVIEW_TAGS séparées par des virgules. */
+    tags: text('tags'),
+    /** Réponse de l'aidant, visible sous l'avis. */
+    reply: text('reply'),
+    repliedAt: integer('replied_at', { mode: 'timestamp_ms' }),
     createdAt: createdAt(),
   },
   (t) => [index('reviews_helper_idx').on(t.helperId)],
 );
 
-export const reviewsRelations = relations(reviews, ({ one }) => ({
+/**
+ * Photos jointes à un avis, stockées dans la base (pas de disque persistant chez l'hébergeur).
+ * Ne jamais sélectionner `data` dans une liste : les images sont servies par /api/photos/[id].
+ */
+export const reviewPhotos = sqliteTable(
+  'review_photos',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    reviewId: integer('review_id')
+      .notNull()
+      .references(() => reviews.id, { onDelete: 'cascade' }),
+    mime: text('mime').notNull(),
+    data: blob('data', { mode: 'buffer' }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('review_photos_review_idx').on(t.reviewId)],
+);
+
+export const reviewsRelations = relations(reviews, ({ one, many }) => ({
   booking: one(bookings, { fields: [reviews.bookingId], references: [bookings.id] }),
   author: one(users, { fields: [reviews.authorId], references: [users.id] }),
   helper: one(users, { fields: [reviews.helperId], references: [users.id] }),
+  photos: many(reviewPhotos),
+}));
+
+export const reviewPhotosRelations = relations(reviewPhotos, ({ one }) => ({
+  review: one(reviews, { fields: [reviewPhotos.reviewId], references: [reviews.id] }),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
@@ -157,3 +185,4 @@ export type Booking = typeof bookings.$inferSelect;
 export type Conversation = typeof conversations.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
+export type ReviewPhoto = typeof reviewPhotos.$inferSelect;

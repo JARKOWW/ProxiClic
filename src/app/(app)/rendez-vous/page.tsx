@@ -3,9 +3,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { acceptBooking, cancelBooking, completeBooking, declineBooking } from '@/actions/bookings';
 import { Flash } from '@/components/Flash';
+import { PhotoGallery } from '@/components/PhotoGallery';
+import { ReplyForm } from '@/components/ReplyForm';
 import { ReviewForm } from '@/components/ReviewForm';
 import { SubmitButton } from '@/components/SubmitButton';
-import { BookingStatusBadge, CategoryBadge, EmptyState, Stars } from '@/components/ui';
+import { BookingStatusBadge, CategoryBadge, EmptyState, ReviewReply, ReviewTags, Stars } from '@/components/ui';
 import { db } from '@/db';
 import { bookings, conversations, requests, reviews } from '@/db/schema';
 import { requireUser } from '@/lib/auth';
@@ -36,7 +38,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
     threads.find((t) => t.requestId === requestId && t.helperId === helperId)?.id;
 
   const reviewRows = rows.length
-    ? await db.query.reviews.findMany({ where: inArray(reviews.bookingId, rows.map((b) => b.id)) })
+    ? await db.query.reviews.findMany({
+        where: inArray(reviews.bookingId, rows.map((b) => b.id)),
+        // Jamais le contenu des images ici : seulement leurs identifiants.
+        with: { photos: { columns: { id: true } } },
+      })
     : [];
   const reviewByBooking = new Map(reviewRows.map((review) => [review.bookingId, review]));
 
@@ -65,8 +71,19 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
           </Link>
         </h3>
         <p className="mt-1">
-          {isHelper ? 'Chez' : 'Avec'} <strong>{displayName(other)}</strong> · {booking.request.neighborhood},{' '}
-          {booking.request.city}
+          {isHelper ? (
+            <>
+              Chez <strong>{displayName(other)}</strong>
+            </>
+          ) : (
+            <>
+              Avec{' '}
+              <Link href={`/aidants/${other.id}`} className="link">
+                {displayName(other)}
+              </Link>
+            </>
+          )}{' '}
+          · {booking.request.neighborhood}, {booking.request.city}
         </p>
         {booking.status === 'confirmed' && other.phone && (
           <p className="mt-1">
@@ -84,6 +101,32 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
                 <Stars value={review.rating} /> {isHelper ? `Avis de ${other.firstName}` : 'Votre avis'}
               </p>
               {review.comment && <p className="mt-2 italic">« {review.comment} »</p>}
+              {review.tags && (
+                <div className="mt-3">
+                  <ReviewTags tags={review.tags} />
+                </div>
+              )}
+              {review.photos.length > 0 && (
+                <div className="mt-3">
+                  <PhotoGallery
+                    photos={review.photos}
+                    label={isHelper ? `Photos de l’avis de ${other.firstName}` : 'Photos de votre avis'}
+                  />
+                </div>
+              )}
+              {review.reply ? (
+                <ReviewReply
+                  title={isHelper ? 'Votre réponse' : `Réponse de ${booking.helper.firstName}`}
+                  reply={review.reply}
+                  repliedAt={review.repliedAt}
+                />
+              ) : (
+                isHelper && (
+                  <div className="mt-4">
+                    <ReplyForm reviewId={review.id} authorName={other.firstName} />
+                  </div>
+                )
+              )}
             </div>
           ) : isHelper ? (
             <p className="text-ink-soft mt-4">{other.firstName} n’a pas encore laissé d’avis.</p>

@@ -89,6 +89,9 @@ Schema change workflow: edit `src/db/schema.ts` → `npm run db:generate` → `n
 
 **Reviews and grades**
 - After a completed appointment, the client can rate the helper from 1 to 5 stars and leave a comment (one review per appointment).
+- A review can carry quick compliments (patient, punctual, clear explanations…) and up to 3 photos or screenshots. Images are resized to JPEG in the browser (which also strips metadata such as GPS position), checked on the server (count, weight, real format) and stored in the `review_photos` table, so no file storage service is needed. They are served by `/api/photos/[id]` and open in a full-screen viewer.
+- The helper can post one public reply under each review received.
+- Every helper has a public profile page (`/aidants/[id]`): grade, rating breakdown, compliments received, photo gallery and all reviews. It only shows what other members may see (first name, initial, neighbourhood, introduction, skills).
 - Helpers earn a grade from their number of completed interventions (thresholds in `src/lib/grades.ts`): Nouvel aidant, Voisin serviable (1), Aidant confirmé (3), Expert du quartier (5), Ange gardien du numérique (10).
 - Grade and average rating appear on each proposal a client receives, on the helper's profile and on the landing page.
 
@@ -104,13 +107,15 @@ All appointment times are entered and displayed in the Europe/Paris time zone, w
 
 ```
 drizzle/                  SQL migrations (generated)
-scripts/                  migrate, seed and reset scripts
+scripts/                  migrate, seed and reset scripts (seed-photos/: fictional demo images)
 src/
   actions/                Server Actions: auth, profile, requests, bookings, messages
   app/
     (auth)/               connexion, inscription
     (app)/                signed-in area: demandes, mes-demandes, rendez-vous, messages, profil
     api/conversations/    JSON endpoint polled by the chat window
+    api/photos/           serves review photos from the database
+    aidants/[id]/         public helper profile with all reviews
     page.tsx              public landing page
   components/             UI components (forms, booking dialog, chat window, header…)
   db/                     Drizzle schema and database client
