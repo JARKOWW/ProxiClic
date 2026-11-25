@@ -13,7 +13,7 @@ export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?
   const links: NavItem[] = !user
     ? []
     : simple
-      ? [{ href: SIMPLE_HOME, label: 'Mon espace' }]
+      ? [] // Affichage simplifié : tout est sur une page, le logo y ramène.
       : [
         user.role === 'helper'
           ? { href: '/demandes', label: 'Demandes' }
@@ -27,9 +27,9 @@ export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?
     <header className="top-0 z-40 px-3 pt-3 sm:px-4 lg:sticky">
       <RoleSync role={user?.role ?? null} simple={simple} />
       <div className="border-line shadow-soft mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-[2rem] border bg-white/95 px-4 py-2.5 backdrop-blur sm:px-5">
-        <Logo />
+        <Logo href={simple ? SIMPLE_HOME : undefined} />
 
-        {user ? (
+        {links.length > 0 ? (
           <nav aria-label="Navigation principale" className="order-3 w-full lg:order-none lg:w-auto">
             <ul className="flex flex-wrap gap-1">
               {links.map((link) => (

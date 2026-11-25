@@ -14,7 +14,7 @@ export default async function SimpleLayout({ children }: { children: React.React
     <>
       <Header user={user} />
       <main id="contenu" className="container-page flex-1 py-8 sm:py-10">
-        <div className="mx-auto max-w-3xl">{children}</div>
+        <div className="mx-auto max-w-xl">{children}</div>
       </main>
       <Footer />
     </>

@@ -13,6 +13,7 @@ const dateTimeFmt = new Intl.DateTimeFormat(LOCALE, {
   minute: '2-digit',
 });
 const dateFmt = new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, day: 'numeric', month: 'long', year: 'numeric' });
+const dayFmt = new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, weekday: 'long', day: 'numeric', month: 'long' });
 const timeFmt = new Intl.DateTimeFormat(LOCALE, { timeZone: TIME_ZONE, hour: '2-digit', minute: '2-digit' });
 const shortFmt = new Intl.DateTimeFormat(LOCALE, {
   timeZone: TIME_ZONE,
@@ -27,6 +28,11 @@ const relativeFmt = new Intl.RelativeTimeFormat(LOCALE, { numeric: 'auto' });
 export const formatDateTime = (d: Date | string | number) => dateTimeFmt.format(new Date(d));
 /** « 12 novembre 2026 » */
 export const formatDate = (d: Date | string | number) => dateFmt.format(new Date(d));
+/** « Jeudi 12 novembre » (première lettre en majuscule) */
+export function formatDay(d: Date | string | number): string {
+  const text = dayFmt.format(new Date(d));
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 /** « 14:00 » */
 export const formatTime = (d: Date | string | number) => timeFmt.format(new Date(d));
 /** « 12 nov., 14:00 » */
