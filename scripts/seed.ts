@@ -1,6 +1,7 @@
 import './load-env';
 import { readFileSync } from 'node:fs';
 import bcrypt from 'bcryptjs';
+import { simpleViewForAge } from '../src/lib/age';
 import { parisToDate } from '../src/lib/format';
 import { reviewExtras } from './review-extras';
 import type { BookingStatus, Category, RequestStatus } from '../src/lib/constants';
@@ -49,7 +50,20 @@ async function main() {
     { key: 'hugo', role: 'helper', firstName: 'Hugo', lastName: 'Lambert', neighborhood: 'Part-Dieu', postalCode: '69003', phone: '06 29 64 70 15', bio: 'Jeune développeur. Je donne volontiers un coup de main le soir et le week-end.', skills: 'Ordinateurs lents, antivirus, sécurité, Mac et Windows' },
   ] as const;
 
-  const SIMPLE_VIEW_KEYS: string[] = ['monique', 'jeanpierre'];
+  // Dates de naissance fictives : l'affichage est attribué selon l'âge, comme à l'inscription.
+  // Colette a moins de 45 ans : elle a l'affichage complet, les autres demandeurs l'affichage simplifié.
+  const BIRTH_DATES: Record<string, string> = {
+    monique: '1951-04-12',
+    jeanpierre: '1948-09-03',
+    colette: '1984-06-21',
+    andre: '1946-01-30',
+    francoise: '1955-11-08',
+    lucas: '2005-02-17',
+    ines: '2003-07-09',
+    theo: '2006-03-25',
+    camille: '2008-10-02',
+    hugo: '2001-12-14',
+  };
   const userId: Record<string, number> = {};
   for (const [i, u] of userRows.entries()) {
     const [row] = await db
@@ -69,8 +83,8 @@ async function main() {
         phone: u.phone,
         bio: u.bio,
         skills: 'skills' in u ? u.skills : null,
-        // Deux demandeurs en affichage simplifié, les autres en affichage complet, pour tester les deux.
-        simpleView: SIMPLE_VIEW_KEYS.includes(u.key),
+        birthDate: BIRTH_DATES[u.key],
+        simpleView: simpleViewForAge(u.role, BIRTH_DATES[u.key]),
         createdAt: ago((60 - i * 4) * DAY),
       })
       .returning({ id: users.id });

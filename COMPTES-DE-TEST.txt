@@ -12,11 +12,11 @@ Ils sont réservés au développement : ne les utilisez jamais en production.
 DEMANDEURS (personnes qui ont besoin d'aide)
 --------------------------------------------
 
-Monique Durand          monique.durand@example.fr          Croix-Rousse     affichage simplifié
-Jean-Pierre Lefèvre     jean-pierre.lefevre@example.fr     Monplaisir       affichage simplifié
-Colette Moreau          colette.moreau@example.fr          Vaise
-André Girard            andre.girard@example.fr            Guillotière
-Françoise Bernard       francoise.bernard@example.fr       Croix-Rousse
+Monique Durand          monique.durand@example.fr          Croix-Rousse     75 ans, affichage simplifié
+Jean-Pierre Lefèvre     jean-pierre.lefevre@example.fr     Monplaisir       78 ans, affichage simplifié
+Colette Moreau          colette.moreau@example.fr          Vaise            42 ans, affichage complet
+André Girard            andre.girard@example.fr            Guillotière      80 ans, affichage simplifié
+Françoise Bernard       francoise.bernard@example.fr       Croix-Rousse     71 ans, affichage simplifié
 
 
 AIDANTS (personnes qui proposent leur aide)
@@ -42,7 +42,7 @@ lucas.martin@example.fr     (aidant)
   - une proposition en attente de réponse
   - des interventions passées avec des avis reçus
 
-andre.girard@example.fr     (demandeur, affichage complet)
+andre.girard@example.fr     (demandeur, affichage simplifié)
   - deux propositions concurrentes pour la même demande
 
 francoise.bernard@example.fr (demandeuse)
@@ -52,10 +52,13 @@ francoise.bernard@example.fr (demandeuse)
 AFFICHAGE DES DEMANDEURS
 ------------------------
 
-À l'inscription, un demandeur indique sa tranche d'âge :
+À l'inscription, chacun indique sa date de naissance. Pour les demandeurs :
   - moins de 45 ans  -> affichage complet (plusieurs pages)
   - 45 ans ou plus   -> affichage simplifié (/mon-espace, tout sur une page)
 Chacun peut changer d'affichage à tout moment avec le bouton prévu à cet effet.
+Modifier sa date de naissance dans « Mon profil » attribue de nouveau l'affichage selon l'âge.
+
+colette.moreau@example.fr  (demandeuse, 42 ans) : pour tester l'affichage complet.
 
 
 REMETTRE LES DONNÉES À ZÉRO

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ageFrom, MAX_AGE, MIN_AGE, simpleViewForAge } from './age';
 import { CATEGORY_KEYS, DURATIONS, REVIEW_TAG_KEYS, ROLES } from './constants';
 
 /** État renvoyé par les actions serveur aux formulaires. */
@@ -22,6 +23,20 @@ export function formValues(formData: FormData): Record<string, string> {
 
 export const fieldErrors = (error: z.ZodError) =>
   z.flattenError(error).fieldErrors as Record<string, string[] | undefined>;
+
+/**
+ * Erreurs d'un formulaire avec date de naissance : la date est vérifiée même quand un autre champ
+ * est faux, pour que toutes les corrections soient demandées en une seule fois.
+ */
+export function fieldErrorsWithBirthDate(error: z.ZodError, values: Record<string, string>, optional = false) {
+  const errors = fieldErrors(error);
+  const empty = !values.birthDay && !values.birthMonth && !values.birthYear;
+  if (!errors.birthDate && !(optional && empty)) {
+    const birth = parseBirthDate(values);
+    if ('error' in birth) errors.birthDate = [birth.error];
+  }
+  return errors;
+}
 
 const requiredText = (label: string, min: number, max: number) =>
   z
@@ -66,26 +81,61 @@ const identity = {
   lastName: requiredText('Le nom', 2, 60),
 };
 
-export const AGE_GROUPS = ['moins-45', '45-et-plus'] as const;
+/**
+ * Date de naissance saisie en trois champs (jour, mois, année) : plus simple qu'un calendrier
+ * pour beaucoup de personnes, et utilisable au clavier comme avec un lecteur d'écran.
+ */
+const birthDateFields = {
+  birthDay: z.string().trim().optional(),
+  birthMonth: z.string().trim().optional(),
+  birthYear: z.string().trim().optional(),
+};
+
+type BirthDateInput = { birthDay?: string; birthMonth?: string; birthYear?: string };
+
+/** Renvoie la date au format AAAA-MM-JJ, ou un message d'erreur en clair. */
+export function parseBirthDate({ birthDay, birthMonth, birthYear }: BirthDateInput): { date: string } | { error: string } {
+  if (!birthDay || !birthMonth || !birthYear) {
+    return { error: 'Veuillez indiquer votre date de naissance complète : jour, mois et année.' };
+  }
+  if (!/^\d{1,2}$/.test(birthDay) || !/^\d{1,2}$/.test(birthMonth) || !/^\d{4}$/.test(birthYear)) {
+    return { error: 'La date de naissance doit être écrite en chiffres, par exemple 14 / 03 / 1952.' };
+  }
+  const [day, month, year] = [Number(birthDay), Number(birthMonth), Number(birthYear)];
+  const check = new Date(Date.UTC(year, month - 1, day));
+  if (check.getUTCFullYear() !== year || check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day) {
+    return { error: 'Cette date n’existe pas. Vérifiez le jour et le mois.' };
+  }
+  const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const age = ageFrom(date);
+  if (age < MIN_AGE || age > MAX_AGE) {
+    return { error: `Vous devez avoir entre ${MIN_AGE} et ${MAX_AGE} ans pour vous inscrire.` };
+  }
+  return { date };
+}
+
+/** Ajoute le champ `birthDate` validé (ou une erreur sur `birthDate`) à partir des trois champs saisis. */
+function withBirthDate<T extends BirthDateInput>(data: T, ctx: z.RefinementCtx) {
+  const { birthDay: _d, birthMonth: _m, birthYear: _y, ...rest } = data;
+  const parsed = parseBirthDate(data);
+  if ('error' in parsed) {
+    ctx.addIssue({ code: 'custom', path: ['birthDate'], message: parsed.error });
+    return z.NEVER;
+  }
+  return { ...rest, birthDate: parsed.date };
+}
 
 export const registerSchema = z
   .object({
     role: z.enum(ROLES, { error: 'Veuillez choisir un type de compte.' }),
-    /** Demandé aux demandeurs seulement, pour choisir l'affichage. L'âge lui-même n'est pas enregistré. */
-    ageGroup: z.enum(AGE_GROUPS, { error: 'Veuillez indiquer votre tranche d’âge.' }).optional(),
     ...identity,
     email,
     password,
     ...location,
+    ...birthDateFields,
   })
-  .refine((data) => data.role !== 'client' || data.ageGroup, {
-    path: ['ageGroup'],
-    error: 'Veuillez indiquer votre tranche d’âge.',
-  })
-  .transform(({ ageGroup, ...data }) => ({
-    ...data,
-    simpleView: data.role === 'client' && ageGroup === '45-et-plus',
-  }));
+  .transform(withBirthDate)
+  .transform((data) => ({ ...data, simpleView: simpleViewForAge(data.role, data.birthDate) }));
 
 /** Demande en affichage simplifié : pas de titre à inventer, il est déduit de la catégorie et du texte. */
 export const simpleRequestSchema = z.object({
@@ -112,6 +162,14 @@ export const profileSchema = z.object({
     }),
   bio: optionalText('La présentation', 500),
   skills: optionalText('Les compétences', 200),
+  ...birthDateFields,
+}).transform((data, ctx) => {
+  // Facultative dans le profil (comptes créés avant son ajout), mais complète et valide si elle est saisie.
+  if (!data.birthDay && !data.birthMonth && !data.birthYear) {
+    const { birthDay: _d, birthMonth: _m, birthYear: _y, ...rest } = data;
+    return { ...rest, birthDate: null as string | null };
+  }
+  return withBirthDate(data, ctx);
 });
 
 export const requestSchema = z.object({

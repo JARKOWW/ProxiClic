@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { updateProfile } from '@/actions/profile';
 import type { SessionUser } from '@/lib/auth';
 import { SubmitButton } from './SubmitButton';
-import { Field, Notice } from './ui';
+import { BirthDateField, Field, Notice } from './ui';
 
 export function ProfileForm({ user }: { user: SessionUser }) {
   const [state, action] = useActionState(updateProfile, undefined);
@@ -31,6 +31,18 @@ export function ProfileForm({ user }: { user: SessionUser }) {
         hint="Communiqué uniquement à la personne avec qui un rendez-vous est confirmé."
         defaultValue={value('phone')}
         errors={errors.phone}
+      />
+
+      <BirthDateField
+        values={state?.values}
+        saved={user.birthDate}
+        errors={errors.birthDate}
+        optional={!user.birthDate}
+        hint={
+          user.role === 'client'
+            ? 'Jamais montrée aux autres membres. Si vous la modifiez, l’affichage est choisi de nouveau selon votre âge (affichage simplifié à partir de 45 ans).'
+            : 'Jamais montrée aux autres membres.'
+        }
       />
 
       <fieldset className="space-y-5">

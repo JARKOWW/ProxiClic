@@ -204,3 +204,59 @@ export function FieldErrors({ id, errors }: { id?: string; errors?: string[] }) 
     </p>
   );
 }
+
+type BirthDateFieldProps = {
+  /** Valeurs déjà saisies (après une erreur) ou date enregistrée au format AAAA-MM-JJ. */
+  values?: { birthDay?: string; birthMonth?: string; birthYear?: string };
+  saved?: string | null;
+  errors?: string[];
+  hint: string;
+  optional?: boolean;
+};
+
+/**
+ * Date de naissance en trois champs (jour, mois, année), regroupés et décrits ensemble :
+ * plus facile à remplir qu'un calendrier, au doigt comme au clavier.
+ */
+export function BirthDateField({ values, saved, errors, hint, optional }: BirthDateFieldProps) {
+  const [savedYear, savedMonth, savedDay] = saved ? saved.split('-') : [];
+  const invalid = errors?.length ? true : undefined;
+  const describedBy = ['naissance-aide', invalid && 'naissance-erreur'].filter(Boolean).join(' ');
+  const parts = [
+    { name: 'birthDay', label: 'Jour', autoComplete: 'bday-day', maxLength: 2, width: 'w-20', value: values?.birthDay ?? (savedDay ? String(Number(savedDay)) : '') },
+    { name: 'birthMonth', label: 'Mois', autoComplete: 'bday-month', maxLength: 2, width: 'w-20', value: values?.birthMonth ?? (savedMonth ? String(Number(savedMonth)) : '') },
+    { name: 'birthYear', label: 'Année', autoComplete: 'bday-year', maxLength: 4, width: 'w-28', value: values?.birthYear ?? savedYear ?? '' },
+  ];
+
+  return (
+    <fieldset aria-describedby={describedBy}>
+      <legend className="label">
+        Date de naissance {optional && <span className="text-ink-soft font-normal">(facultatif)</span>}
+      </legend>
+      <p id="naissance-aide" className="hint">
+        {hint}
+      </p>
+      <div className="flex flex-wrap gap-4">
+        {parts.map((part) => (
+          <div key={part.name}>
+            <label htmlFor={part.name} className="mb-1 block font-bold">
+              {part.label}
+            </label>
+            <input
+              id={part.name}
+              name={part.name}
+              inputMode="numeric"
+              autoComplete={part.autoComplete}
+              maxLength={part.maxLength}
+              defaultValue={part.value}
+              required={!optional}
+              aria-invalid={invalid}
+              className={`input ${part.width}`}
+            />
+          </div>
+        ))}
+      </div>
+      <FieldErrors id="naissance-erreur" errors={errors} />
+    </fieldset>
+  );
+}

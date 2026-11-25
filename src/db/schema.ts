@@ -20,10 +20,12 @@ export const users = sqliteTable('users', {
   phone: text('phone'),
   bio: text('bio'),
   skills: text('skills'),
+  /** Date de naissance (AAAA-MM-JJ). Jamais montrée aux autres membres ; sert à choisir l'affichage. */
+  birthDate: text('birth_date'),
   /**
    * Demandeurs uniquement : affichage simplifié sur une seule page (/mon-espace).
-   * Proposé par défaut à l'inscription aux 45 ans et plus ; modifiable à tout moment.
-   * Seul ce choix est enregistré, jamais l'âge.
+   * Attribué selon l'âge (45 ans et plus, voir lib/age.ts) à l'inscription ou quand la date de naissance
+   * change ; la personne peut ensuite en changer à tout moment.
    */
   simpleView: integer('simple_view', { mode: 'boolean' }).notNull().default(false),
   createdAt: createdAt(),

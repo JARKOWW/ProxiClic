@@ -5,25 +5,12 @@ import { useActionState, useState } from 'react';
 import { login, register } from '@/actions/auth';
 import { ROLES, ROLE_LABELS, type Role } from '@/lib/constants';
 import { SubmitButton } from './SubmitButton';
-import { Field, FieldErrors, Notice } from './ui';
+import { BirthDateField, Field, FieldErrors, Notice } from './ui';
 
 const ROLE_DESCRIPTIONS: Record<Role, string> = {
   client: 'Je cherche un voisin pour m’aider avec mon ordinateur, mon téléphone, ma box…',
   helper: 'Je suis à l’aise avec le numérique et je veux aider les habitants de mon quartier.',
 };
-
-const AGE_CHOICES = [
-  {
-    value: 'moins-45',
-    label: 'Moins de 45 ans',
-    description: 'Affichage complet : vos demandes, rendez-vous et messages sur des pages séparées.',
-  },
-  {
-    value: '45-et-plus',
-    label: '45 ans ou plus',
-    description: 'Affichage simplifié : tout sur une seule page, avec de très grands caractères.',
-  },
-];
 
 export function LoginForm() {
   const [state, action] = useActionState(login, undefined);
@@ -98,37 +85,15 @@ export function RegisterForm({ defaultRole }: { defaultRole?: Role }) {
         <FieldErrors errors={errors.role} />
       </fieldset>
 
-      {role === 'client' && (
-        <fieldset aria-describedby={`age-aide${errors.ageGroup ? ' ageGroup-erreur' : ''}`}>
-          <legend className="label">Quel âge avez-vous ?</legend>
-          <p id="age-aide" className="hint">
-            Cela nous permet de vous proposer l’affichage le plus confortable. Votre âge n’est pas enregistré ni
-            montré aux autres membres, et vous pourrez changer d’affichage à tout moment.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {AGE_CHOICES.map((choice) => (
-              <label
-                key={choice.value}
-                className="border-line-strong has-checked:border-brand-700 has-checked:bg-brand-100 flex cursor-pointer gap-3 rounded-xl border-2 bg-white p-4"
-              >
-                <input
-                  type="radio"
-                  name="ageGroup"
-                  value={choice.value}
-                  defaultChecked={values.ageGroup === choice.value}
-                  required
-                  className="accent-brand-700 mt-1 h-6 w-6 shrink-0"
-                />
-                <span>
-                  <span className="block font-bold">{choice.label}</span>
-                  <span className="text-ink-soft block text-sm">{choice.description}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-          <FieldErrors id="ageGroup-erreur" errors={errors.ageGroup} />
-        </fieldset>
-      )}
+      <BirthDateField
+        values={values}
+        errors={errors.birthDate}
+        hint={
+          role === 'client'
+            ? 'Par exemple : 14 / 3 / 1952. Elle n’est jamais montrée aux autres membres : elle sert à vous proposer l’affichage le plus confortable (affichage simplifié à partir de 45 ans). Vous pourrez en changer à tout moment.'
+            : 'Par exemple : 14 / 3 / 2004. Elle n’est jamais montrée aux autres membres.'
+        }
+      />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Prénom" name="firstName" autoComplete="given-name" required defaultValue={values.firstName} errors={errors.firstName} />
