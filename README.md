@@ -1,4 +1,4 @@
-# Proxi'Tech — L'informatique à domicile
+# Proxi'Clic — L'informatique à domicile
 
 Neighbourhood tech-support platform. Tech-savvy young helpers (*aidants*) assist seniors and other residents (*demandeurs*) with home IT tasks: printer setup, Wi-Fi trouble, smartphone training, online paperwork, and so on.
 
@@ -99,7 +99,7 @@ Schema change workflow: edit `src/db/schema.ts` → `npm run db:generate` → `n
 - Live figures from the database, top helpers, latest reviews, the grade ladder, recent open requests (no personal data), FAQ and safety advice.
 
 **Branding**
-- `public/logo.png` is the official logo (also used for the browser icon via `src/app/icon.png`). `src/components/Logo.tsx` holds a vector version of the emblem for the header.
+- `public/logo-proxiclic.png` is the official logo (its emblem is cropped into the browser icons `src/app/icon.png` and `src/app/apple-icon.png`). `src/components/Logo.tsx` holds a vector version of the emblem for the header.
 
 All appointment times are entered and displayed in the Europe/Paris time zone, wherever the server runs.
 

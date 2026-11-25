@@ -1,4 +1,4 @@
-export const APP_NAME = "Proxi'Tech";
+export const APP_NAME = "Proxi'Clic";
 export const APP_TAGLINE = "L'informatique à domicile";
 
 export const ROLES = ['client', 'helper'] as const;

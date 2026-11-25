@@ -169,7 +169,7 @@ export default async function SimpleHomePage({ searchParams }: { searchParams: P
                     ) : null}
                     {helperStats?.completed
                       ? `a déjà aidé ${plural(helperStats.completed, 'voisin', 'voisins')}`
-                      : 'nouveau sur Proxi’Tech'}
+                      : 'nouveau sur Proxi’Clic'}
                     {' · '}
                     <Link href={`/aidants/${booking.helperId}`} className="link">
                       Voir son profil<span className="sr-only"> ({displayName(booking.helper)})</span>

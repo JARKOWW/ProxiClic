@@ -27,8 +27,8 @@ export default async function AccessibilityPage() {
           <h1 className="page-title">Déclaration d’accessibilité</h1>
 
           <p className="text-lg">
-            Proxi’Tech s’engage à rendre son site accessible à tous, conformément à l’article 47 de la loi n° 2005-102
-            du 11 février 2005. Cette déclaration s’applique à l’ensemble du site Proxi’Tech.
+            Proxi’Clic s’engage à rendre son site accessible à tous, conformément à l’article 47 de la loi n° 2005-102
+            du 11 février 2005. Cette déclaration s’applique à l’ensemble du site Proxi’Clic.
           </p>
 
           <section aria-labelledby="etat" className="card space-y-3">

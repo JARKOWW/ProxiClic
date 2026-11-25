@@ -24,7 +24,7 @@ const bricolage = Bricolage_Grotesque({
 export const metadata: Metadata = {
   title: { default: `${APP_NAME} — ${APP_TAGLINE}`, template: `%s — ${APP_NAME}` },
   description:
-    "Proxi'Tech met en relation des voisins : des jeunes à l'aise avec le numérique aident les seniors pour l'imprimante, le Wi-Fi, le smartphone et bien plus, directement à domicile.",
+    "Proxi'Clic met en relation des voisins : des jeunes à l'aise avec le numérique aident les seniors pour l'imprimante, le Wi-Fi, le smartphone et bien plus, directement à domicile.",
 };
 
 export const viewport: Viewport = { themeColor: '#8B0000' };

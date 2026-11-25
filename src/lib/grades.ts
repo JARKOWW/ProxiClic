@@ -1,6 +1,6 @@
 /** Grades des aidants, attribués selon le nombre d'interventions effectuées. */
 export const GRADES = [
-  { min: 0, name: 'Nouvel aidant', icon: '🌱', description: 'Vient de rejoindre Proxi’Tech' },
+  { min: 0, name: 'Nouvel aidant', icon: '🌱', description: 'Vient de rejoindre Proxi’Clic' },
   { min: 1, name: 'Voisin serviable', icon: '🤝', description: 'Dès la 1re intervention effectuée' },
   { min: 3, name: 'Aidant confirmé', icon: '⭐', description: 'À partir de 3 interventions' },
   { min: 5, name: 'Expert du quartier', icon: '🏅', description: 'À partir de 5 interventions' },

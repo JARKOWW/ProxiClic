@@ -104,7 +104,7 @@ export default async function HomePage() {
               <span className="text-brand-700">appareils</span>.
             </h1>
             <p className="text-ink-soft mt-6 max-w-xl text-xl">
-              Proxi’Tech met en relation les habitants d’un même quartier : des jeunes à l’aise avec le numérique donnent
+              Proxi’Clic met en relation les habitants d’un même quartier : des jeunes à l’aise avec le numérique donnent
               un coup de main à ceux qui en ont besoin, directement à la maison.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -153,7 +153,7 @@ export default async function HomePage() {
             <div aria-hidden="true" className="bg-brand-700 absolute inset-x-8 top-10 bottom-4 rotate-6 rounded-[3rem]" />
             <div aria-hidden="true" className="bg-brand-200 absolute -top-2 -right-2 h-24 w-24 rounded-full" />
             <Image
-              src="/logo.png"
+              src="/logo-proxiclic.png"
               alt=""
               width={512}
               height={512}
@@ -188,7 +188,7 @@ export default async function HomePage() {
         {/* Chiffres clés */}
         <section aria-labelledby="chiffres" className="container-page">
           <h2 id="chiffres" className="sr-only">
-            Proxi’Tech en chiffres
+            Proxi’Clic en chiffres
           </h2>
           <dl className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
             {figures.map((figure, index) => (
@@ -330,7 +330,7 @@ export default async function HomePage() {
             <div className="mx-auto max-w-5xl">
               <p className="eyebrow">Progression</p>
               <h2 id="grades" className="section-title">
-                Les grades Proxi’Tech
+                Les grades Proxi’Clic
               </h2>
               <p className="text-brand-100 mt-2 max-w-2xl text-lg">
                 Chaque coup de main compte : plus un aidant rend service, plus il monte en grade.

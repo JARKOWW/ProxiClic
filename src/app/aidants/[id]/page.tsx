@@ -154,7 +154,7 @@ export default async function HelperProfilePage({ params }: Props) {
                 <EmptyState title="Pas encore d’avis">
                   <p>
                     Les avis apparaissent ici après chaque intervention effectuée. {helper.firstName} débute peut-être
-                    sur Proxi’Tech !
+                    sur Proxi’Clic !
                   </p>
                 </EmptyState>
               </div>

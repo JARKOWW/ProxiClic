@@ -1,4 +1,4 @@
-PROXI'TECH — COMPTES DE TEST
+PROXI'CLIC — COMPTES DE TEST
 ============================
 
 Site : http://localhost:3000/connexion

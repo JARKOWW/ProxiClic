@@ -86,7 +86,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     suggested: true,
     keywords: ['payant', 'gratuit', 'prix', 'cout', 'coute', 'payer', 'argent', 'tarif', 'euros', 'combien'],
     answer:
-      'L’inscription sur Proxi’Tech est gratuite. Le site ne gère aucun paiement : c’est de l’entraide entre voisins. Ne donnez jamais vos codes bancaires ni vos mots de passe, même à un aidant.',
+      'L’inscription sur Proxi’Clic est gratuite. Le site ne gère aucun paiement : c’est de l’entraide entre voisins. Ne donnez jamais vos codes bancaires ni vos mots de passe, même à un aidant.',
   },
   {
     id: 'securite',

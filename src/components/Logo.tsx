@@ -2,29 +2,29 @@ import Link from 'next/link';
 import { APP_NAME, APP_TAGLINE } from '@/lib/constants';
 
 /**
- * Emblème Proxi'Tech : une maison dont le curseur de souris franchit le seuil.
- * Version vectorielle du logo officiel (public/logo.png), lisible en petite taille.
+ * Emblème Proxi'Clic : une maison dont le curseur de souris franchit le seuil.
+ * Version vectorielle du logo officiel (public/logo-proxiclic.png), lisible en petite taille.
  */
 export function LogoMark({ size = 48 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-      <rect width="48" height="48" rx="11" fill="#FADADD" />
-      {/* Maison : contour ouvert en bas à droite, cheminée à droite du toit */}
+      <rect width="48" height="48" rx="11" fill="#FDC1C1" />
+      {/* Cheminée, dessinée sous le toit */}
+      <rect x="32.2" y="10.6" width="5.5" height="9" rx="0.9" fill="#970C12" />
+      {/* Maison : contour ouvert en bas, mur droit coupé net */}
       <path
-        d="M19.5 37.5h-4.5a4 4 0 0 1-4-4V21.2a4 4 0 0 1 1.4-3L22 9.6a3 3 0 0 1 4 0l9.6 8.6a4 4 0 0 1 1.4 3V27"
+        d="M18.3 37.9H14a4.5 4.5 0 0 1-4.5-4.5V22.4L24 9.7l14.5 12.5v9.4"
         fill="none"
-        stroke="#8B0000"
-        strokeWidth="4.2"
-        strokeLinecap="round"
+        stroke="#970C12"
+        strokeWidth="4.9"
         strokeLinejoin="round"
       />
-      <path d="M32.8 10.5v5.5" fill="none" stroke="#8B0000" strokeWidth="4.2" strokeLinecap="round" />
       {/* Curseur */}
       <path
-        d="M22.6 19.6v17.2l4.4-4 3.3 6.6 3.4-1.7-3.3-6.5h6z"
-        fill="#8B0000"
-        stroke="#8B0000"
-        strokeWidth="1.6"
+        d="M20.2 19.7l13.6 10-3.9 1.9 2.6 6.7-4.9 2.8-2.8-5.9-4.6 2.2z"
+        fill="#970C12"
+        stroke="#970C12"
+        strokeWidth="1.4"
         strokeLinejoin="round"
       />
     </svg>
