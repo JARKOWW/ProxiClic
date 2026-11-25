@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import { bookings, messages, requests } from '@/db/schema';
-import { requireUser } from '@/lib/auth';
+import { afterAction, requireUser, SIMPLE_HOME, usesSimpleView } from '@/lib/auth';
 import { getOrCreateConversation } from '@/lib/conversations';
 import { formatDateTime, formatDuration, parisToDate } from '@/lib/format';
 import { bookingSchema, fieldErrors, formValues, idSchema, type FormState } from '@/lib/validation';
@@ -107,7 +107,7 @@ export async function acceptBooking(bookingId: number): Promise<void> {
   });
 
   revalidatePath('/', 'layout');
-  redirect('/rendez-vous?ok=confirme');
+  redirect(afterAction(user, '/rendez-vous', 'confirme'));
 }
 
 /** Le demandeur refuse une proposition en attente. */
@@ -118,6 +118,8 @@ export async function declineBooking(bookingId: number): Promise<void> {
 
   await db.update(bookings).set({ status: 'declined' }).where(eq(bookings.id, booking.id));
   revalidatePath('/', 'layout');
+  // En affichage simplifié, un message confirme clairement le refus.
+  if (usesSimpleView(user)) redirect(`${SIMPLE_HOME}?ok=refuse`);
 }
 
 /** L'aidant retire sa proposition, ou l'un des deux participants annule un rendez-vous confirmé. */
@@ -150,7 +152,7 @@ export async function cancelBooking(bookingId: number): Promise<void> {
   }
 
   revalidatePath('/', 'layout');
-  redirect('/rendez-vous?ok=annule');
+  redirect(afterAction(user, '/rendez-vous', 'annule'));
 }
 
 /** L'un des deux participants indique que l'intervention a eu lieu. */
@@ -167,5 +169,5 @@ export async function completeBooking(bookingId: number): Promise<void> {
   });
 
   revalidatePath('/', 'layout');
-  redirect('/rendez-vous?ok=termine');
+  redirect(afterAction(user, '/rendez-vous', 'termine'));
 }

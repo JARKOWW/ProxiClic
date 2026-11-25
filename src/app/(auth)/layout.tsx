@@ -4,7 +4,7 @@ import { getCurrentUser, homeFor } from '@/lib/auth';
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
-  if (user) redirect(homeFor(user.role));
+  if (user) redirect(homeFor(user));
 
   return (
     <>

@@ -49,6 +49,7 @@ async function main() {
     { key: 'hugo', role: 'helper', firstName: 'Hugo', lastName: 'Lambert', neighborhood: 'Part-Dieu', postalCode: '69003', phone: '06 29 64 70 15', bio: 'Jeune développeur. Je donne volontiers un coup de main le soir et le week-end.', skills: 'Ordinateurs lents, antivirus, sécurité, Mac et Windows' },
   ] as const;
 
+  const SIMPLE_VIEW_KEYS: string[] = ['monique', 'jeanpierre'];
   const userId: Record<string, number> = {};
   for (const [i, u] of userRows.entries()) {
     const [row] = await db
@@ -68,6 +69,8 @@ async function main() {
         phone: u.phone,
         bio: u.bio,
         skills: 'skills' in u ? u.skills : null,
+        // Deux demandeurs en affichage simplifié, les autres en affichage complet, pour tester les deux.
+        simpleView: SIMPLE_VIEW_KEYS.includes(u.key),
         createdAt: ago((60 - i * 4) * DAY),
       })
       .returning({ id: users.id });

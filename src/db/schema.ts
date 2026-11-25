@@ -20,6 +20,12 @@ export const users = sqliteTable('users', {
   phone: text('phone'),
   bio: text('bio'),
   skills: text('skills'),
+  /**
+   * Demandeurs uniquement : affichage simplifié sur une seule page (/mon-espace).
+   * Proposé par défaut à l'inscription aux 45 ans et plus ; modifiable à tout moment.
+   * Seul ce choix est enregistré, jamais l'âge.
+   */
+  simpleView: integer('simple_view', { mode: 'boolean' }).notNull().default(false),
   createdAt: createdAt(),
 });
 

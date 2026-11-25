@@ -46,7 +46,7 @@ export async function register(_prev: FormState, formData: FormData): Promise<Fo
     .returning({ id: users.id });
 
   await createSession(created.id);
-  redirect(`${homeFor(data.role)}?ok=bienvenue`);
+  redirect(`${homeFor(data)}?ok=bienvenue`);
 }
 
 export async function login(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -75,7 +75,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
 
   resetRateLimit(limitKey);
   await createSession(user.id);
-  redirect(homeFor(user.role));
+  redirect(homeFor(user));
 }
 
 export async function logout(): Promise<void> {

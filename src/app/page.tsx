@@ -109,7 +109,7 @@ export default async function HomePage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               {user ? (
-                <Link href={homeFor(user.role)} className="btn btn-primary btn-lg">
+                <Link href={homeFor(user)} className="btn btn-primary btn-lg">
                   Accéder à mon espace <span aria-hidden="true">→</span>
                 </Link>
               ) : (

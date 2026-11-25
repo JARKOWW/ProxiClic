@@ -42,6 +42,14 @@
     font-size: 100%;
   }
 
+  /* Affichage simplifié des demandeurs : texte encore plus grand (20 px) et interlignage aéré. */
+  html[data-view='simple'] {
+    font-size: 125%;
+  }
+  html[data-view='simple'] body {
+    line-height: 1.7;
+  }
+
   body {
     background-color: var(--color-paper);
     background-image:
@@ -170,5 +178,33 @@
   }
   .page-lead {
     @apply text-ink-soft mt-2 max-w-2xl text-lg;
+  }
+
+  /* ——— Affichage simplifié des demandeurs ——— */
+
+  /* Grande section numérotée, bien séparée de la suivante. */
+  .simple-section {
+    @apply border-line shadow-soft scroll-mt-6 rounded-3xl border-2 bg-white p-5 sm:p-8;
+  }
+  .simple-section > h2 {
+    @apply flex items-center gap-3 text-3xl;
+  }
+
+  /* Pastille de numéro d'étape. */
+  .simple-step {
+    @apply bg-brand-700 mr-2 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full align-middle text-lg text-white;
+  }
+  .simple-step-field .label {
+    @apply text-xl;
+  }
+
+  /* Choix à cocher sous forme de grande carte (cible bien plus large que 44 px). */
+  .simple-choice {
+    @apply border-line-strong has-checked:border-brand-700 has-checked:bg-brand-100 has-focus-visible:outline-ink flex min-h-16 cursor-pointer items-center gap-4 rounded-2xl border-2 bg-white px-4 py-3 text-lg font-bold has-focus-visible:outline-3 has-focus-visible:outline-offset-2;
+  }
+
+  /* Information importante mise en avant (date de rendez-vous, numéro de téléphone). */
+  .simple-highlight {
+    @apply bg-brand-50 border-brand-700 rounded-2xl border-l-8 p-4 text-xl;
   }
 }

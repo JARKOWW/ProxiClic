@@ -9,6 +9,9 @@ const MESSAGES: Record<string, string> = {
   confirme: 'Le rendez-vous est confirmé. Vous pouvez échanger par messages pour préparer la visite.',
   annule: 'Le rendez-vous a été annulé.',
   termine: 'Merci ! L’intervention est marquée comme effectuée.',
+  refuse: 'Vous avez refusé cette proposition.',
+  'vue-simple': 'Vous êtes maintenant en affichage simplifié : tout est réuni sur cette page.',
+  'vue-complete': 'Vous êtes maintenant en affichage complet.',
 };
 
 export function Flash({ code }: { code?: string }) {

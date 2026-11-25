@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Atkinson_Hyperlegible, Bricolage_Grotesque } from 'next/font/google';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, usesSimpleView } from '@/lib/auth';
 import { APP_NAME, APP_TAGLINE } from '@/lib/constants';
 import './globals.css';
 
@@ -33,7 +33,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const user = await getCurrentUser();
 
   return (
-    <html lang="fr" data-role={user?.role} className={`${atkinson.variable} ${bricolage.variable}`}>
+    <html
+      lang="fr"
+      data-role={user?.role}
+      data-view={user && usesSimpleView(user) ? 'simple' : undefined}
+      className={`${atkinson.variable} ${bricolage.variable}`}>
       <body className="flex min-h-screen flex-col font-sans">
         <a
           href="#contenu"

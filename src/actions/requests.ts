@@ -5,8 +5,17 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import { bookings, requests } from '@/db/schema';
-import { requireUser } from '@/lib/auth';
-import { fieldErrors, formValues, idSchema, requestSchema, type FormState } from '@/lib/validation';
+import { afterAction, requireUser } from '@/lib/auth';
+import { CATEGORIES } from '@/lib/constants';
+import { excerpt } from '@/lib/format';
+import {
+  fieldErrors,
+  formValues,
+  idSchema,
+  requestSchema,
+  simpleRequestSchema,
+  type FormState,
+} from '@/lib/validation';
 
 export async function createRequest(_prev: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
@@ -25,8 +34,37 @@ export async function createRequest(_prev: FormState, formData: FormData): Promi
     .values({ ...parsed.data, clientId: user.id, neighborhood: user.neighborhood, city: user.city })
     .returning({ id: requests.id });
 
-  revalidatePath('/demandes');
-  redirect(`/demandes/${created.id}?ok=publiee`);
+  revalidatePath('/', 'layout');
+  redirect(afterAction(user, `/demandes/${created.id}`, 'publiee'));
+}
+
+/** Version simplifiée : catégorie et explication suffisent, le titre est déduit automatiquement. */
+export async function createSimpleRequest(_prev: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const values = formValues(formData);
+  if (user.role !== 'client') {
+    return { error: 'Seuls les demandeurs peuvent publier une demande.', values };
+  }
+
+  const parsed = simpleRequestSchema.safeParse(values);
+  if (!parsed.success) {
+    return { error: 'Il manque une information.', fieldErrors: fieldErrors(parsed.error), values };
+  }
+
+  const { category, description, availability } = parsed.data;
+  const firstLine = description.split('\n')[0];
+  await db.insert(requests).values({
+    title: `${CATEGORIES[category].label} : ${excerpt(firstLine, 70)}`,
+    description,
+    category,
+    availability,
+    clientId: user.id,
+    neighborhood: user.neighborhood,
+    city: user.city,
+  });
+
+  revalidatePath('/', 'layout');
+  redirect(afterAction(user, '/mes-demandes', 'publiee'));
 }
 
 /** Le demandeur annule sa demande : les propositions et rendez-vous en cours sont annulés. */
@@ -52,5 +90,5 @@ export async function cancelRequest(requestId: number): Promise<void> {
   });
 
   revalidatePath('/', 'layout');
-  redirect('/mes-demandes?ok=annulee');
+  redirect(afterAction(user, '/mes-demandes', 'annulee'));
 }

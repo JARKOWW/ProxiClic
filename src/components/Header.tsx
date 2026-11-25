@@ -1,25 +1,31 @@
 import Link from 'next/link';
 import { logout } from '@/actions/auth';
-import type { SessionUser } from '@/lib/auth';
+import { setSimpleView } from '@/actions/profile';
+import { SIMPLE_HOME, usesSimpleView, type SessionUser } from '@/lib/auth';
 import { Logo, LogoMark } from './Logo';
 import { NavLink } from './NavLink';
 import { RoleSync } from './RoleSync';
 
+type NavItem = { href: string; label: string; badge?: number; live?: boolean };
+
 export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?: number }) {
-  const links = user
-    ? [
+  const simple = user ? usesSimpleView(user) : false;
+  const links: NavItem[] = !user
+    ? []
+    : simple
+      ? [{ href: SIMPLE_HOME, label: 'Mon espace' }]
+      : [
         user.role === 'helper'
           ? { href: '/demandes', label: 'Demandes' }
           : { href: '/mes-demandes', label: 'Mes demandes' },
         { href: '/rendez-vous', label: 'Rendez-vous' },
         { href: '/messages', label: 'Messages', badge: unread, live: true },
         { href: '/profil', label: 'Mon profil' },
-      ]
-    : [];
+      ];
 
   return (
     <header className="top-0 z-40 px-3 pt-3 sm:px-4 lg:sticky">
-      <RoleSync role={user?.role ?? null} />
+      <RoleSync role={user?.role ?? null} simple={simple} />
       <div className="border-line shadow-soft mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-[2rem] border bg-white/95 px-4 py-2.5 backdrop-blur sm:px-5">
         <Logo />
 
@@ -28,7 +34,7 @@ export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?
             <ul className="flex flex-wrap gap-1">
               {links.map((link) => (
                 <li key={link.href}>
-                  <NavLink href={link.href} badge={link.badge} live={'live' in link}>
+                  <NavLink href={link.href} badge={link.badge} live={link.live}>
                     {link.label}
                   </NavLink>
                 </li>
@@ -38,8 +44,15 @@ export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?
         ) : null}
 
         {user ? (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="text-ink-soft hidden 2xl:inline">Bonjour, {user.firstName}</span>
+            {user.role === 'client' && !simple && (
+              <form action={setSimpleView.bind(null, true)}>
+                <button type="submit" className="btn btn-secondary px-4 sm:px-6">
+                  Affichage simplifié
+                </button>
+              </form>
+            )}
             <form action={logout}>
               <button type="submit" className="btn btn-quiet px-4 sm:px-6">
                 <span className="sm:hidden">Quitter</span>
@@ -73,7 +86,14 @@ export function Footer() {
             L&apos;informatique à domicile
           </p>
         </div>
-        <p>L&apos;entraide numérique entre voisins, tout simplement.</p>
+        <div className="space-y-2 sm:text-right">
+          <p>L&apos;entraide numérique entre voisins, tout simplement.</p>
+          <p>
+            <Link href="/accessibilite" className="font-bold text-white underline underline-offset-4">
+              Accessibilité : non conforme
+            </Link>
+          </p>
+        </div>
       </div>
     </footer>
   );

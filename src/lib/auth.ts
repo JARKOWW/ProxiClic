@@ -29,4 +29,21 @@ export async function requireUser(): Promise<SessionUser> {
   return user;
 }
 
-export const homeFor = (role: Role) => (role === 'helper' ? '/demandes' : '/mes-demandes');
+/** Page unique de l'affichage simplifié des demandeurs. */
+export const SIMPLE_HOME = '/mon-espace';
+
+type HomeUser = { role: Role; simpleView: boolean };
+
+export const usesSimpleView = (user: HomeUser) => user.role === 'client' && user.simpleView;
+
+export const homeFor = (user: HomeUser) =>
+  user.role === 'helper' ? '/demandes' : usesSimpleView(user) ? SIMPLE_HOME : '/mes-demandes';
+
+/**
+ * Où renvoyer un demandeur après une action : en affichage simplifié, tout se passe sur une seule page,
+ * on y revient donc toujours (avec le même message de confirmation).
+ */
+export function afterAction(user: HomeUser, path: string, ok?: string): string {
+  if (usesSimpleView(user)) return ok ? `${SIMPLE_HOME}?ok=${ok}` : SIMPLE_HOME;
+  return ok ? `${path}?ok=${ok}` : path;
+}

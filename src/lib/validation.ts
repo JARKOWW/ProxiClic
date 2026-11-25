@@ -66,12 +66,32 @@ const identity = {
   lastName: requiredText('Le nom', 2, 60),
 };
 
-export const registerSchema = z.object({
-  role: z.enum(ROLES, { error: 'Veuillez choisir un type de compte.' }),
-  ...identity,
-  email,
-  password,
-  ...location,
+export const AGE_GROUPS = ['moins-45', '45-et-plus'] as const;
+
+export const registerSchema = z
+  .object({
+    role: z.enum(ROLES, { error: 'Veuillez choisir un type de compte.' }),
+    /** Demandé aux demandeurs seulement, pour choisir l'affichage. L'âge lui-même n'est pas enregistré. */
+    ageGroup: z.enum(AGE_GROUPS, { error: 'Veuillez indiquer votre tranche d’âge.' }).optional(),
+    ...identity,
+    email,
+    password,
+    ...location,
+  })
+  .refine((data) => data.role !== 'client' || data.ageGroup, {
+    path: ['ageGroup'],
+    error: 'Veuillez indiquer votre tranche d’âge.',
+  })
+  .transform(({ ageGroup, ...data }) => ({
+    ...data,
+    simpleView: data.role === 'client' && ageGroup === '45-et-plus',
+  }));
+
+/** Demande en affichage simplifié : pas de titre à inventer, il est déduit de la catégorie et du texte. */
+export const simpleRequestSchema = z.object({
+  category: z.enum(CATEGORY_KEYS, { error: 'Veuillez choisir ce qui vous pose problème.' }),
+  description: requiredText('L’explication', 10, 1500),
+  availability: optionalText('Les disponibilités', 200),
 });
 
 export const loginSchema = z.object({

@@ -145,7 +145,7 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
 }
 
 type FieldProps = {
-  label: string;
+  label: React.ReactNode;
   name: string;
   hint?: string;
   errors?: string[];
@@ -155,11 +155,13 @@ type FieldProps = {
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'name'>;
 
 /** Champ de formulaire accessible : libellé, aide et erreurs reliés au champ. */
-export function Field({ label, name, hint, errors, optional, multiline, rows = 5, ...props }: FieldProps) {
-  const hintId = hint ? `${name}-aide` : undefined;
-  const errorId = errors?.length ? `${name}-erreur` : undefined;
+export function Field({ label, name, hint, errors, optional, multiline, rows = 5, id, ...props }: FieldProps) {
+  // Un identifiant explicite évite les doublons quand le même champ apparaît plusieurs fois sur une page.
+  const fieldId = id ?? name;
+  const hintId = hint ? `${fieldId}-aide` : undefined;
+  const errorId = errors?.length ? `${fieldId}-erreur` : undefined;
   const shared = {
-    id: name,
+    id: fieldId,
     name,
     className: 'input',
     'aria-invalid': errors?.length ? true : undefined,
@@ -168,7 +170,7 @@ export function Field({ label, name, hint, errors, optional, multiline, rows = 5
 
   return (
     <div>
-      <label htmlFor={name} className="label">
+      <label htmlFor={fieldId} className="label">
         {label} {optional && <span className="text-ink-soft font-normal">(facultatif)</span>}
       </label>
       {hint && (

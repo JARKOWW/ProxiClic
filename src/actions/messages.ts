@@ -1,13 +1,14 @@
 'use server';
 
 import { eq } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { db } from '@/db';
 import { messages, requests } from '@/db/schema';
-import { requireUser } from '@/lib/auth';
+import { requireUser, SIMPLE_HOME } from '@/lib/auth';
 import { findConversationFor, getOrCreateConversation } from '@/lib/conversations';
 import { rateLimit } from '@/lib/rate-limit';
-import { idSchema, messageSchema } from '@/lib/validation';
+import { idSchema, messageSchema, type FormState } from '@/lib/validation';
 
 export type ChatMessage = { id: number; senderId: number; body: string; createdAt: string };
 
@@ -54,4 +55,17 @@ export async function startConversation(requestId: number): Promise<void> {
 
   const conversationId = await getOrCreateConversation(request.id, request.clientId, user.id);
   redirect(`/messages/${conversationId}`);
+}
+
+/** Variante formulaire de sendMessage, utilisée par l'affichage simplifié (sans JavaScript de discussion). */
+export async function sendMessageForm(
+  conversationId: number,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const body = formData.get('body');
+  const result = await sendMessage(conversationId, typeof body === 'string' ? body : '');
+  if (!result.ok) return { error: result.error, values: { body: typeof body === 'string' ? body : '' } };
+  revalidatePath(SIMPLE_HOME);
+  return { success: 'Votre message est envoyé.' };
 }
