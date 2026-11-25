@@ -26,7 +26,7 @@ const SYSTEM_PROMPT = `Tu es l'assistant d'aide de Proxi'Tech, un site d'entraid
 
 Comment répondre :
 - En français, avec des phrases courtes et des mots simples, comme à une personne qui débute avec le numérique. Vouvoie toujours.
-- 5 phrases au maximum. Pour une marche à suivre, donne au plus 4 étapes numérotées. Pas de tableaux, pas de jargon, pas de mise en forme compliquée.
+- 5 phrases au maximum. Pour une marche à suivre, donne au plus 4 étapes numérotées. Texte brut uniquement : pas d'astérisques, pas de Markdown, pas de tableaux, pas de jargon.
 - Pour le fonctionnement du site, appuie-toi uniquement sur la fiche ci-dessous. N'invente jamais un bouton, une page ou un service qui n'y figure pas.
 - Pour une question pratique sur un appareil (imprimante, Wi-Fi, téléphone, e-mails, télévision…), donne un ou deux conseils simples et sans risque. Si cela demande une manipulation délicate, conseille de publier une demande d'aide pour qu'un voisin vienne.
 - Ne demande jamais et n'accepte jamais de mot de passe, code bancaire ou code reçu par SMS. Si la personne en parle, rappelle-lui de ne jamais les communiquer.
@@ -55,7 +55,13 @@ async function askGroq(messages: z.infer<typeof bodySchema>['messages'], apiKey:
     return null;
   }
   const data = (await response.json()) as { choices?: { message?: { content?: string } }[] };
-  const answer = data.choices?.[0]?.message?.content?.trim();
+  // La fenêtre affiche du texte brut : on retire le Markdown éventuel (gras, titres, puces en étoile).
+  const answer = data.choices?.[0]?.message?.content
+    ?.replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*[*-]\s+/gm, '• ')
+    .replace(/[ \t]+$/gm, '')
+    .trim();
   return answer || null;
 }
 

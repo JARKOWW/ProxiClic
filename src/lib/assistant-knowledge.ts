@@ -29,7 +29,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     suggested: true,
     keywords: ['proposition', 'propose', 'accepter', 'accepte', 'choisir', 'creneau', 'date', 'venir', 'refuser', 'refuse'],
     answer:
-      'La proposition s’affiche sur votre page avec le jour, l’heure et la note de l’aidant. Appuyez sur « Accepter » si cela vous convient : le rendez-vous est confirmé et les autres propositions pour la même demande sont refusées. Sinon, appuyez sur « Refuser ». Vous pouvez aussi lui écrire avant de décider.',
+      'La proposition s’affiche sur votre page, dans le cadre blanc « Un voisin propose de venir », avec le jour, l’heure et la note de l’aidant. Appuyez sur « Accepter » si cela vous convient : le rendez-vous est confirmé et les autres propositions pour la même demande sont refusées. Sinon, appuyez sur « Refuser ». Vous pouvez aussi lui écrire avant de décider.',
   },
   {
     id: 'rendez-vous',
@@ -144,6 +144,13 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     keywords: ['preparer', 'avant', 'prevoir', 'besoin', 'apporter', 'materiel', 'cable', 'wifi'],
     answer:
       'Gardez à portée de main l’appareil concerné, son chargeur ou ses câbles, et les codes utiles notés sur papier (par exemple le mot de passe du Wi-Fi, souvent écrit sous la box). Préparez aussi vos questions : l’aidant prendra le temps de vous expliquer.',
+  },
+  {
+    id: 'page',
+    question: 'Comment est organisée ma page ?',
+    keywords: ['ou', 'trouver', 'page', 'organisee', 'rubrique', 'perdu', 'voir'],
+    answer:
+      'En affichage simplifié, tout est sur une seule page, de haut en bas : le rendez-vous confirmé (grand cadre rouge avec le bouton « Appeler »), les propositions des voisins (cadre blanc avec « Accepter » et « Refuser »), l’avis à donner après une visite, les messages, le bouton « Demander de l’aide », puis la liste de vos demandes. Le bouton « Une question ? » en bas à droite ouvre cet assistant.',
   },
   {
     id: 'bonjour',
