@@ -77,7 +77,7 @@ export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?
 
 export function Footer() {
   return (
-    <footer className="mt-20 px-3 pb-3 sm:px-4">
+    <footer className="mt-20 px-3 pb-24 sm:px-4">
       <div className="bg-brand-900 text-brand-100 mx-auto flex w-full max-w-5xl flex-col gap-4 rounded-[2rem] px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
         <div className="flex items-center gap-3">
           <LogoMark size={44} />

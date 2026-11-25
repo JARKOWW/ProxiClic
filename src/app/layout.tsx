@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Atkinson_Hyperlegible, Bricolage_Grotesque } from 'next/font/google';
+import { HelpAssistant } from '@/components/HelpAssistant';
 import { getCurrentUser, usesSimpleView } from '@/lib/auth';
 import { APP_NAME, APP_TAGLINE } from '@/lib/constants';
 import './globals.css';
@@ -46,6 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Aller au contenu principal
         </a>
         {children}
+        <HelpAssistant />
       </body>
     </html>
   );
