@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { logout } from '@/actions/auth';
 import { setSimpleView } from '@/actions/profile';
 import { SIMPLE_HOME, usesSimpleView, type SessionUser } from '@/lib/auth';
+import { APP_NAME, APP_TAGLINE } from '@/lib/constants';
 import { Logo, LogoMark } from './Logo';
 import { NavLink } from './NavLink';
 import { RoleSync } from './RoleSync';
@@ -82,8 +83,8 @@ export function Footer() {
         <div className="flex items-center gap-3">
           <LogoMark size={44} />
           <p className="leading-tight">
-            <strong className="font-display block text-xl text-white">Proxi&apos;Tech</strong>
-            L&apos;informatique à domicile
+            <strong className="font-display block text-xl text-white">{APP_NAME}</strong>
+            {APP_TAGLINE}
           </p>
         </div>
         <div className="space-y-2 sm:text-right">
