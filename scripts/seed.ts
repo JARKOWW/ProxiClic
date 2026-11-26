@@ -1,4 +1,5 @@
 import './load-env';
+import { randomBytes } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import bcrypt from 'bcryptjs';
 import { simpleViewForAge } from '../src/lib/age';
@@ -6,8 +7,11 @@ import { parisToDate } from '../src/lib/format';
 import { reviewExtras } from './review-extras';
 import type { BookingStatus, Category, RequestStatus } from '../src/lib/constants';
 
-/** Mot de passe commun à tous les comptes de démonstration. */
-const DEMO_PASSWORD = 'Proxitech2026';
+/**
+ * Mot de passe commun à tous les comptes de démonstration.
+ * Lu dans SEED_PASSWORD (.env) ; à défaut, un mot de passe aléatoire est généré et affiché en fin de script.
+ */
+const DEMO_PASSWORD = process.env.SEED_PASSWORD?.trim() || `Demo-${randomBytes(6).toString('base64url')}1`;
 
 const DAY = 86_400_000;
 const HOUR = 3_600_000;
