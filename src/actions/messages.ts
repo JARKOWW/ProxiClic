@@ -21,7 +21,7 @@ export async function sendMessage(conversationId: number, body: string): Promise
   if (!id.success) return { ok: false, error: 'Conversation introuvable.' };
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'Message invalide.' };
 
-  if (!rateLimit(`message:${user.id}`, 30, 60_000).allowed) {
+  if (!(await rateLimit(`message:${user.id}`, 30, 60_000)).allowed) {
     return { ok: false, error: 'Vous envoyez des messages trop rapidement. Patientez un instant.' };
   }
 

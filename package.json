@@ -14,7 +14,9 @@
     "db:demo-extras": "tsx scripts/add-demo-extras.ts",
     "db:reset": "tsx scripts/reset.ts && npm run db:migrate && npm run db:seed",
     "db:studio": "drizzle-kit studio",
-    "setup": "npm run db:migrate && npm run db:seed"
+    "setup": "npm run db:migrate && npm run db:seed",
+    "db:purge": "tsx scripts/purge.ts",
+    "db:rotate-demo": "tsx scripts/rotate-demo-passwords.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Footer, Header } from '@/components/Header';
 import { PhotoGallery } from '@/components/PhotoGallery';
+import { ReportLink } from '@/components/ReportLink';
 import { CategoryBadge, EmptyState, formatRating, GradeBadge, ReviewReply, ReviewTags, Stars } from '@/components/ui';
 import { getCurrentUser } from '@/lib/auth';
 import { REVIEW_TAG_KEYS } from '@/lib/constants';
@@ -149,6 +150,14 @@ export default async function HelperProfilePage({ params }: Props) {
             <h2 id="avis" className="text-2xl">
               {reviews.length > 0 ? `Tous les avis (${reviews.length})` : 'Avis'}
             </h2>
+            {reviews.length > 0 && (
+              <p className="text-ink-soft mt-1">
+                Avis vérifiés : laissés uniquement après une intervention effectuée. Du plus récent au plus ancien.{' '}
+                <Link href="/cgu#avis" className="link">
+                  Comment fonctionnent les avis
+                </Link>
+              </p>
+            )}
             {reviews.length === 0 ? (
               <div className="mt-4">
                 <EmptyState title="Pas encore d’avis">
@@ -192,6 +201,9 @@ export default async function HelperProfilePage({ params }: Props) {
                         repliedAt={review.repliedAt}
                       />
                     )}
+                    <p className="mt-3 text-right">
+                      <ReportLink subject={`Signalement de l’avis n° ${review.id}`} label="Signaler cet avis" className="text-ink-soft" />
+                    </p>
                   </li>
                 ))}
               </ul>

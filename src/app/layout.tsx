@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Aller au contenu principal
         </a>
         {children}
-        <HelpAssistant />
+        <HelpAssistant aiEnabled={!!process.env.GROQ_API_KEY} />
       </body>
     </html>
   );

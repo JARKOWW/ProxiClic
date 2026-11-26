@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Footer, Header } from '@/components/Header';
+import { ContactEmail } from '@/components/LegalPage';
 import { getCurrentUser } from '@/lib/auth';
+import { legalInfo } from '@/lib/legal';
 
 export const metadata: Metadata = { title: 'Accessibilité' };
 
@@ -18,6 +20,7 @@ const MEASURES = [
 
 export default async function AccessibilityPage() {
   const user = await getCurrentUser();
+  const info = legalInfo();
 
   return (
     <>
@@ -25,6 +28,7 @@ export default async function AccessibilityPage() {
       <main id="contenu" className="container-page flex-1 py-8 sm:py-10">
         <article className="mx-auto max-w-3xl space-y-8">
           <h1 className="page-title">Déclaration d’accessibilité</h1>
+          <p className="text-ink-soft">Déclaration établie le 27 novembre 2026.</p>
 
           <p className="text-lg">
             Proxi’Clic s’engage à rendre son site accessible à tous, conformément à l’article 47 de la loi n° 2005-102
@@ -53,6 +57,16 @@ export default async function AccessibilityPage() {
             </ul>
           </section>
 
+          <section aria-labelledby="non-accessibles" className="card space-y-3">
+            <h2 id="non-accessibles" className="text-2xl">
+              Contenus non accessibles
+            </h2>
+            <p>
+              La liste précise sera établie lors de l’audit RGAA. Point déjà connu : les photos jointes aux avis par
+              les membres n’ont pas de description détaillée de leur contenu, seulement une légende générale.
+            </p>
+          </section>
+
           <section aria-labelledby="technologies" className="card space-y-3">
             <h2 id="technologies" className="text-2xl">
               Technologies utilisées
@@ -65,8 +79,9 @@ export default async function AccessibilityPage() {
               Signaler un problème et voies de recours
             </h2>
             <p>
-              Si vous n’arrivez pas à accéder à un contenu ou à un service, signalez-le au responsable du site : nous
-              vous proposerons une autre façon d’y accéder.
+              Si vous n’arrivez pas à accéder à un contenu ou à un service, signalez-le au responsable du site, par
+              e-mail à <ContactEmail email={info.contactEmail} configured={info.contactConfigured} /> : nous vous
+              proposerons une autre façon d’y accéder.
             </p>
             <p>
               Si vous n’obtenez pas de réponse, vous pouvez saisir le Défenseur des droits, par son formulaire en ligne

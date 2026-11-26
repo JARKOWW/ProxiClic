@@ -337,6 +337,12 @@ export default async function SimpleHomePage({ searchParams }: { searchParams: P
         </section>
       )}
 
+      <p className="text-center">
+        <Link href="/mon-compte" className="link">
+          Mon mot de passe, mes données, supprimer mon compte
+        </Link>
+      </p>
+
       <form action={setSimpleView.bind(null, false)} className="text-center">
         <SubmitButton className="text-ink-soft hover:text-ink min-h-12 cursor-pointer px-2 underline underline-offset-4">
           Passer à l’affichage complet

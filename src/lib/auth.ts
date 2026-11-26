@@ -9,17 +9,20 @@ import { readSession } from './session';
 
 const BCRYPT_COST = 12;
 
-export type SessionUser = Omit<User, 'passwordHash'>;
+export type SessionUser = Omit<User, 'passwordHash' | 'sessionVersion'>;
 
 export const hashPassword = (plain: string) => bcrypt.hash(plain, BCRYPT_COST);
 export const verifyPassword = (plain: string, hash: string) => bcrypt.compare(plain, hash);
 
 /** Utilisateur connecté (sans le hash du mot de passe), mémorisé le temps d'une requête. */
 export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
-  const id = await readSession();
-  if (!id) return null;
-  const user = await db.query.users.findFirst({ where: eq(users.id, id), columns: { passwordHash: false } });
-  return user ?? null;
+  const session = await readSession();
+  if (!session) return null;
+  const user = await db.query.users.findFirst({ where: eq(users.id, session.userId), columns: { passwordHash: false } });
+  // Jeton émis avant un changement de mot de passe (ou une réinitialisation des sessions) : refusé.
+  if (!user || user.sessionVersion !== session.version) return null;
+  const { sessionVersion: _version, ...rest } = user;
+  return rest;
 });
 
 /** À utiliser dans les pages et actions protégées : redirige vers la connexion si besoin. */

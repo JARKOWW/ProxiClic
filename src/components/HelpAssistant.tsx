@@ -13,7 +13,8 @@ const WELCOME =
  * Fenêtre modale native (<dialog>) : piège le focus, se ferme avec Échap ; les réponses sont annoncées
  * aux lecteurs d'écran grâce à la zone role="log".
  */
-export function HelpAssistant() {
+/** `aiEnabled` : vrai si une clé Groq est configurée (les questions partent alors aux États-Unis). */
+export function HelpAssistant({ aiEnabled = false }: { aiEnabled?: boolean }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   // Dernier message affiché : on fait défiler jusqu'à son début pour lire la réponse depuis la première ligne.
@@ -93,10 +94,12 @@ export function HelpAssistant() {
           <div className="border-line flex items-center justify-between gap-4 border-b px-5 py-4">
             <div>
               <h2 id="assistant-titre" className="text-2xl">
-                Une question ?
+                {aiEnabled ? "Assistant automatique (IA)" : "Assistant automatique"}
               </h2>
               <p className="text-ink-soft text-sm">
-                Je réponds tout de suite, jour et nuit.
+                {aiEnabled
+                  ? "Je suis un programme d’intelligence artificielle, pas une personne. Je peux me tromper : pour un vrai problème, demandez l’aide d’un voisin."
+                  : "Je suis un programme, pas une personne. Pour un vrai problème, demandez l’aide d’un voisin."}
               </p>
             </div>
             <button
@@ -175,6 +178,13 @@ export function HelpAssistant() {
             <label htmlFor="assistant-question" className="label text-sm">
               Votre question
             </label>
+            <p id="assistant-consigne" className="text-ink-soft mb-2 text-sm">
+              N’écrivez ni votre nom, ni votre adresse, ni un mot de passe ou un code.
+              {aiEnabled && " Vos questions sont envoyées à un service d’IA situé aux États-Unis (Groq)."}{" "}
+              <a href="/confidentialite#destinataires" className="link">
+                En savoir plus
+              </a>
+            </p>
             <div className="flex items-end gap-2">
               <textarea
                 ref={inputRef}
@@ -189,6 +199,7 @@ export function HelpAssistant() {
                     ask(draft);
                   }
                 }}
+                aria-describedby="assistant-consigne"
                 placeholder="Par exemple : mon Wi-Fi ne marche plus"
                 className="input min-h-14 flex-1 resize-none"
               />

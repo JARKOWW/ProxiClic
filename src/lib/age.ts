@@ -3,6 +3,8 @@ import { TIME_ZONE } from './format';
 /** À partir de cet âge, les demandeurs reçoivent l'affichage simplifié. */
 export const SIMPLE_VIEW_MIN_AGE = 45;
 export const MIN_AGE = 15;
+/** Âge minimum des aidants, qui se rendent seuls au domicile de personnes souvent âgées. */
+export const HELPER_MIN_AGE = 18;
 export const MAX_AGE = 120;
 
 /** Date du jour à l'heure de Paris, au format AAAA-MM-JJ. */

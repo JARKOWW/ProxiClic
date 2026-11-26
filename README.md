@@ -51,6 +51,8 @@ The app refuses to start a session if `SESSION_SECRET` is missing or too short.
 | `npm run db:reset` | Deletes the local SQLite file, then migrates and seeds again. Stop the dev server first |
 | `npm run db:generate` | Generates a new migration after editing `src/db/schema.ts` |
 | `npm run db:studio` | Opens Drizzle Studio to browse the data |
+| `npm run db:purge` | Deletes data past its retention period (run daily in production) |
+| `npm run db:rotate-demo` | Gives the demo accounts a new random password (or `SEED_PASSWORD`) and signs them out |
 
 Schema change workflow: edit `src/db/schema.ts` → `npm run db:generate` → `npm run db:migrate`.
 
@@ -121,15 +123,25 @@ src/
 - Sessions are HS256-signed JWTs in an `HttpOnly`, `SameSite=Lax` cookie (also `Secure` in production), valid for 7 days.
 - Every server action and API route re-checks the session, the user's role and ownership of the record before reading or writing. Requests, bookings and conversations belonging to other members return a 404.
 - All input is validated with Zod on the server; the database is only reached through Drizzle's parameterised queries.
-- Login attempts are rate-limited (5 per 15 minutes per e-mail and IP), with a constant-time path and an identical error message for unknown e-mails. Registration and message sending are rate-limited too.
-- Server Actions are protected against cross-site requests by Next.js' origin check; security headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`) are set in `next.config.ts`.
+- Login attempts are rate-limited (5 per 15 minutes per e-mail and IP, 20 per hour per e-mail), with a constant-time path and an identical error message for unknown e-mails. Registration, message sending, password changes and the assistant are rate-limited too. Counters live in the `rate_limits` table, so the limits hold across serverless instances.
+- Passwords need 12 characters including a letter and a digit (CNIL recommendation 2022-100).
+- Session tokens carry `users.session_version`: changing the password bumps it and signs out every other device.
+- Server Actions are protected against cross-site requests by Next.js' origin check. `src/proxy.ts` sets a nonce-based Content-Security-Policy; `next.config.ts` sets HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy`.
+- The assistant route rejects cross-site calls, masks e-mails, phone numbers and long digit sequences before calling Groq, and caps Groq calls per day (`GROQ_DAILY_LIMIT`).
 
-### Before deploying to production
+### Legal and privacy (RGPD)
 
-- The rate limiter is in memory, so it only works for a single server instance. Use a shared store (Redis or similar) if you run several.
-- No Content-Security-Policy is set yet.
-- SQLite as a local file needs a persistent disk. For serverless hosting, point `DATABASE_URL` at a hosted libSQL database (and extend `src/db/index.ts` to pass its auth token).
-- There is no e-mail verification or password-reset flow.
+- `/mentions-legales`, `/confidentialite`, `/cgu` and `/accessibilite`, linked from every footer. Editor details come from `LEGAL_*` environment variables (see `.env.example`), never from the public repository.
+- Sign-up requires accepting the terms (`users.terms_accepted_at`). Helpers must be at least 18.
+- Members can download their data as JSON and delete their account (profile page, or `/mon-compte` in the simple view).
+- `npm run db:purge` applies the retention periods (inactive accounts after 3 years, cancelled requests after 12 months); run it daily.
+- While demo accounts (`@example.fr`) exist, a banner warns that members and reviews are fictitious.
+
+See `DEPLOIEMENT.md` (French) for the production checklist: Vercel, Contabo VPS, nginx, backups.
+
+### Known limits
+
+- There is no e-mail verification or password-reset-by-e-mail flow (no e-mail service yet).
 
 ## Accessibility
 

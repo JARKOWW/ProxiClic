@@ -1,4 +1,5 @@
-import { and, count, countDistinct, desc, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, count, countDistinct, desc, eq, isNotNull, like, sql } from 'drizzle-orm';
+import { cache } from 'react';
 import { db } from '@/db';
 import { bookings, requests, reviews, users } from '@/db/schema';
 
@@ -104,6 +105,15 @@ export async function helperProfile(helperId: number) {
 
   return { helper, stats, reviews: reviewRows, distribution, tagCounts };
 }
+
+/**
+ * Vrai si la base contient les comptes de démonstration (adresses @example.fr créées par le seed) :
+ * un bandeau prévient alors que les membres, avis et chiffres sont fictifs (Code de la consommation, L121-4).
+ */
+export const hasDemoData = cache(async (): Promise<boolean> => {
+  const row = await db.query.users.findFirst({ where: like(users.email, '%@example.fr'), columns: { id: true } });
+  return !!row;
+});
 
 /** Chiffres clés affichés sur la page d'accueil. */
 export async function communityStats() {
