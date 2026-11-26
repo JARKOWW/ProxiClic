@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 /** Émis par la fenêtre de discussion quand des messages viennent d'être lus. */
-export const MESSAGES_READ_EVENT = 'proxitech:messages-read';
+export const MESSAGES_READ_EVENT = 'proxiclic:messages-read';
 const REFRESH_INTERVAL_MS = 10_000;
 
 type Props = {

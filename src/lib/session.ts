@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const COOKIE_NAME = 'proxitech_session';
+const COOKIE_NAME = 'proxiclic_session';
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 jours
 
 function secretKey(): Uint8Array {

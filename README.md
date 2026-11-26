@@ -36,7 +36,7 @@ Defined in `.env` (never committed; `.env.example` is the template).
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `DATABASE_URL` | yes | libSQL URL. Local file by default: `file:./data/proxitech.db` (relative to the project root) |
+| `DATABASE_URL` | yes | libSQL URL. Local file by default: `file:./data/proxiclic.db` (relative to the project root) |
 | `SESSION_SECRET` | yes | Key used to sign session cookies, 32 characters minimum. Generate one with `openssl rand -base64 48` |
 
 The app refuses to start a session if `SESSION_SECRET` is missing or too short.

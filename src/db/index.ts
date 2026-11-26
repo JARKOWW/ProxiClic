@@ -8,9 +8,9 @@ if (!url) {
 }
 
 // En développement, on réutilise la même connexion entre deux rechargements à chaud.
-const globalForDb = globalThis as unknown as { __proxitechClient?: Client };
-export const client = globalForDb.__proxitechClient ?? createClient({ url });
-if (process.env.NODE_ENV !== 'production') globalForDb.__proxitechClient = client;
+const globalForDb = globalThis as unknown as { __proxiclicClient?: Client };
+export const client = globalForDb.__proxiclicClient ?? createClient({ url });
+if (process.env.NODE_ENV !== 'production') globalForDb.__proxiclicClient = client;
 
 export const db = drizzle(client, { schema });
 export { schema };
