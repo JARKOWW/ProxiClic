@@ -1,7 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Flash } from '@/components/Flash';
 import { Footer, Header } from '@/components/Header';
 import { PhotoGallery } from '@/components/PhotoGallery';
+import { ReportLink } from '@/components/ReportLink';
 import { formatRating, ReviewTags, Stars } from '@/components/ui';
 import { getCurrentUser, homeFor } from '@/lib/auth';
 import { CATEGORIES, CATEGORY_KEYS } from '@/lib/constants';
@@ -62,7 +64,8 @@ const SAFETY_TIPS = [
   'En cas de doute, demandez à un proche d’être présent lors de la première visite.',
 ];
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ ok?: string }> }) {
+  const { ok } = await searchParams;
   const [user, stats, helpers, reviews, openRequests] = await Promise.all([
     getCurrentUser(),
     communityStats(),
@@ -93,6 +96,11 @@ export default async function HomePage() {
     <>
       <Header user={user} />
       <main id="contenu" className="flex-1 overflow-x-clip">
+        {ok && (
+          <div className="container-page pt-6">
+            <Flash code={ok} />
+          </div>
+        )}
         {/* Accroche */}
         <section className="container-page grid items-center gap-12 pt-12 pb-16 md:grid-cols-[11fr_9fr] md:pt-16 md:pb-20">
           <div>
@@ -374,7 +382,10 @@ export default async function HomePage() {
             <h2 id="avis" className="section-title">
               Ce que disent <span className="marker">les voisins</span>
             </h2>
-            <p className="page-lead">Les avis sont laissés par les demandeurs après chaque intervention.</p>
+            <p className="page-lead">
+              Avis vérifiés : seul un demandeur dont le rendez-vous a eu lieu peut noter l’aidant, une fois par
+              intervention. Tous les avis sont publiés, du plus récent au plus ancien.
+            </p>
             <ul className="mt-10 gap-5 space-y-5 md:columns-2 lg:columns-3">
               {reviews.map((review, index) => {
                 const featured = index === 0;
@@ -430,6 +441,13 @@ export default async function HomePage() {
                         </span>
                       </p>
                     </div>
+                    <p className="relative mt-3 text-right">
+                      <ReportLink
+                        subject={`Signalement de l’avis n° ${review.id}`}
+                        label="Signaler cet avis"
+                        className={featured ? 'text-brand-100' : 'text-ink-soft'}
+                      />
+                    </p>
                   </li>
                 );
               })}

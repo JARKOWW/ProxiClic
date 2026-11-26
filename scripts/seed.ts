@@ -11,7 +11,8 @@ import type { BookingStatus, Category, RequestStatus } from '../src/lib/constant
  * Mot de passe commun à tous les comptes de démonstration.
  * Lu dans SEED_PASSWORD (.env) ; à défaut, un mot de passe aléatoire est généré et affiché en fin de script.
  */
-const DEMO_PASSWORD = process.env.SEED_PASSWORD?.trim() || `Demo-${randomBytes(6).toString('base64url')}1`;
+const DEMO_PASSWORD = process.env.SEED_PASSWORD?.trim() || `Demo-${randomBytes(12).toString('base64url')}-1`;
+if (DEMO_PASSWORD.length < 12) throw new Error('SEED_PASSWORD doit contenir au moins 12 caractères.');
 
 const DAY = 86_400_000;
 const HOUR = 3_600_000;
@@ -39,19 +40,20 @@ async function main() {
 
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
+  // Numéros de téléphone : plages réservées à la fiction par l'ARCEP (04 65 71 et 06 39 98).
   const userRows = [
     // Demandeurs
-    { key: 'monique', role: 'client', firstName: 'Monique', lastName: 'Durand', neighborhood: 'Croix-Rousse', postalCode: '69004', phone: '04 78 28 41 17', bio: 'Retraitée de l’enseignement, je débute avec le numérique mais je suis curieuse d’apprendre.' },
-    { key: 'jeanpierre', role: 'client', firstName: 'Jean-Pierre', lastName: 'Lefèvre', neighborhood: 'Monplaisir', postalCode: '69008', phone: '04 78 74 02 96', bio: 'Ancien menuisier. À l’aise avec les outils, beaucoup moins avec les écrans !' },
-    { key: 'colette', role: 'client', firstName: 'Colette', lastName: 'Moreau', neighborhood: 'Vaise', postalCode: '69009', phone: '06 81 22 45 09', bio: null },
+    { key: 'monique', role: 'client', firstName: 'Monique', lastName: 'Durand', neighborhood: 'Croix-Rousse', postalCode: '69004', phone: '04 65 71 41 17', bio: 'Retraitée de l’enseignement, je débute avec le numérique mais je suis curieuse d’apprendre.' },
+    { key: 'jeanpierre', role: 'client', firstName: 'Jean-Pierre', lastName: 'Lefèvre', neighborhood: 'Monplaisir', postalCode: '69008', phone: '04 65 71 02 96', bio: 'Ancien menuisier. À l’aise avec les outils, beaucoup moins avec les écrans !' },
+    { key: 'colette', role: 'client', firstName: 'Colette', lastName: 'Moreau', neighborhood: 'Vaise', postalCode: '69009', phone: '06 39 98 45 09', bio: null },
     { key: 'andre', role: 'client', firstName: 'André', lastName: 'Girard', neighborhood: 'Guillotière', postalCode: '69007', phone: null, bio: 'J’utilise surtout mon ordinateur pour les mails et les photos de mes petits-enfants.' },
-    { key: 'francoise', role: 'client', firstName: 'Françoise', lastName: 'Bernard', neighborhood: 'Croix-Rousse', postalCode: '69004', phone: '06 47 90 13 58', bio: null },
+    { key: 'francoise', role: 'client', firstName: 'Françoise', lastName: 'Bernard', neighborhood: 'Croix-Rousse', postalCode: '69004', phone: '06 39 98 13 58', bio: null },
     // Aidants
-    { key: 'lucas', role: 'helper', firstName: 'Lucas', lastName: 'Martin', neighborhood: 'Croix-Rousse', postalCode: '69004', phone: '06 12 34 56 78', bio: 'Étudiant en BUT Informatique, j’habite le quartier depuis toujours. Patient et pédagogue.', skills: 'Imprimantes, Windows, messagerie, sauvegarde de photos' },
-    { key: 'ines', role: 'helper', firstName: 'Inès', lastName: 'Benali', neighborhood: 'Guillotière', postalCode: '69007', phone: '07 68 11 92 30', bio: 'En master de communication. J’ai appris WhatsApp à toute ma famille, grands-parents compris !', skills: 'Smartphones Android et iPhone, WhatsApp, appels vidéo, tablettes' },
-    { key: 'theo', role: 'helper', firstName: 'Théo', lastName: 'Rousseau', neighborhood: 'Monplaisir', postalCode: '69008', phone: '06 55 07 83 21', bio: 'Apprenti technicien réseau. Les box et le Wi-Fi n’ont plus de secret pour moi.', skills: 'Box Internet, Wi-Fi, décodeurs TV, télévisions connectées' },
+    { key: 'lucas', role: 'helper', firstName: 'Lucas', lastName: 'Martin', neighborhood: 'Croix-Rousse', postalCode: '69004', phone: '06 39 98 56 78', bio: 'Étudiant en BUT Informatique, j’habite le quartier depuis toujours. Patient et pédagogue.', skills: 'Imprimantes, Windows, messagerie, sauvegarde de photos' },
+    { key: 'ines', role: 'helper', firstName: 'Inès', lastName: 'Benali', neighborhood: 'Guillotière', postalCode: '69007', phone: '06 39 98 92 30', bio: 'En master de communication. J’ai appris WhatsApp à toute ma famille, grands-parents compris !', skills: 'Smartphones Android et iPhone, WhatsApp, appels vidéo, tablettes' },
+    { key: 'theo', role: 'helper', firstName: 'Théo', lastName: 'Rousseau', neighborhood: 'Monplaisir', postalCode: '69008', phone: '06 39 98 83 21', bio: 'Apprenti technicien réseau. Les box et le Wi-Fi n’ont plus de secret pour moi.', skills: 'Box Internet, Wi-Fi, décodeurs TV, télévisions connectées' },
     { key: 'camille', role: 'helper', firstName: 'Camille', lastName: 'Petit', neighborhood: 'Vaise', postalCode: '69009', phone: null, bio: 'Lycéenne en terminale, bénévole à la médiathèque de Vaise le samedi.', skills: 'Tablettes, e-mails, démarches en ligne' },
-    { key: 'hugo', role: 'helper', firstName: 'Hugo', lastName: 'Lambert', neighborhood: 'Part-Dieu', postalCode: '69003', phone: '06 29 64 70 15', bio: 'Jeune développeur. Je donne volontiers un coup de main le soir et le week-end.', skills: 'Ordinateurs lents, antivirus, sécurité, Mac et Windows' },
+    { key: 'hugo', role: 'helper', firstName: 'Hugo', lastName: 'Lambert', neighborhood: 'Part-Dieu', postalCode: '69003', phone: '06 39 98 70 15', bio: 'Jeune développeur. Je donne volontiers un coup de main le soir et le week-end.', skills: 'Ordinateurs lents, antivirus, sécurité, Mac et Windows' },
   ] as const;
 
   // Dates de naissance fictives : l'affichage est attribué selon l'âge, comme à l'inscription.
@@ -89,6 +91,7 @@ async function main() {
         skills: 'skills' in u ? u.skills : null,
         birthDate: BIRTH_DATES[u.key],
         simpleView: simpleViewForAge(u.role, BIRTH_DATES[u.key]),
+        termsAcceptedAt: new Date(),
         createdAt: ago((60 - i * 4) * DAY),
       })
       .returning({ id: users.id });

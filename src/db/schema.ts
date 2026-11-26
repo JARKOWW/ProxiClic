@@ -28,7 +28,26 @@ export const users = sqliteTable('users', {
    * change ; la personne peut ensuite en changer à tout moment.
    */
   simpleView: integer('simple_view', { mode: 'boolean' }).notNull().default(false),
+  /**
+   * Version des sessions : incluse dans le jeton de session et augmentée à chaque changement de mot de passe,
+   * ce qui déconnecte tous les appareils.
+   */
+  sessionVersion: integer('session_version').notNull().default(0),
+  /** Dernière connexion : sert à supprimer les comptes inactifs (voir scripts/purge.ts). */
+  lastLoginAt: integer('last_login_at', { mode: 'timestamp_ms' }),
+  /** Date d'acceptation des CGU (preuve du consentement au contrat). */
+  termsAcceptedAt: integer('terms_accepted_at', { mode: 'timestamp_ms' }),
   createdAt: createdAt(),
+});
+
+/**
+ * Compteurs de la limitation des tentatives (connexion, inscription, messages, assistant).
+ * Stockés dans la base pour fonctionner aussi quand le site tourne sur plusieurs instances.
+ */
+export const rateLimits = sqliteTable('rate_limits', {
+  key: text('key').primaryKey(),
+  count: integer('count').notNull(),
+  resetAt: integer('reset_at').notNull(),
 });
 
 export const requests = sqliteTable(

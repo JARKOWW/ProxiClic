@@ -5,9 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { redirect } from 'next/navigation';
-import { simpleViewForAge } from '@/lib/age';
+import { ageFrom, HELPER_MIN_AGE, simpleViewForAge } from '@/lib/age';
 import { homeFor, requireUser } from '@/lib/auth';
-import { fieldErrorsWithBirthDate, formValues, profileSchema, type FormState } from '@/lib/validation';
+import { fieldErrorsWithBirthDate, formValues, helperAgeError, profileSchema, type FormState } from '@/lib/validation';
 
 export async function updateProfile(_prev: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
@@ -24,6 +24,9 @@ export async function updateProfile(_prev: FormState, formData: FormData): Promi
   const { skills, birthDate, ...data } = parsed.data;
   // Une date de naissance déjà enregistrée ne peut pas être effacée, seulement corrigée.
   const nextBirthDate = birthDate ?? user.birthDate;
+  if (user.role === 'helper' && nextBirthDate && ageFrom(nextBirthDate) < HELPER_MIN_AGE) {
+    return { error: 'Certains champs sont à corriger.', fieldErrors: { birthDate: [helperAgeError] }, values };
+  }
   // Nouvelle date de naissance : l'affichage est de nouveau attribué selon l'âge.
   const birthDateChanged = nextBirthDate !== null && nextBirthDate !== user.birthDate;
   const simpleView = birthDateChanged ? simpleViewForAge(user.role, nextBirthDate) : user.simpleView;

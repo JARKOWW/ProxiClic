@@ -12,6 +12,7 @@ const MESSAGES: Record<string, string> = {
   refuse: 'Vous avez refusé cette proposition.',
   'vue-simple': 'Vous êtes maintenant en affichage simplifié : tout est réuni sur cette page.',
   'vue-complete': 'Vous êtes maintenant en affichage complet.',
+  'compte-supprime': 'Votre compte et toutes vos données ont été supprimés. Merci d’avoir utilisé Proxi’Clic.',
 };
 
 export function Flash({ code }: { code?: string }) {

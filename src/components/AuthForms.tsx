@@ -91,7 +91,7 @@ export function RegisterForm({ defaultRole }: { defaultRole?: Role }) {
         hint={
           role === 'client'
             ? 'Par exemple : 14 / 3 / 1952. Elle n’est jamais montrée aux autres membres : elle sert à vous proposer l’affichage le plus confortable (affichage simplifié à partir de 45 ans). Vous pourrez en changer à tout moment.'
-            : 'Par exemple : 14 / 3 / 2004. Elle n’est jamais montrée aux autres membres.'
+            : 'Par exemple : 14 / 3 / 2004. Les aidants doivent avoir au moins 18 ans. Elle n’est jamais montrée aux autres membres.'
         }
       />
 
@@ -107,7 +107,7 @@ export function RegisterForm({ defaultRole }: { defaultRole?: Role }) {
         type="password"
         autoComplete="new-password"
         required
-        hint="Au moins 8 caractères, dont une lettre et un chiffre."
+        hint="Au moins 12 caractères, dont une lettre et un chiffre. Astuce : une petite phrase facile à retenir, par exemple « MonChatAime3Croquettes »."
         errors={errors.password}
       />
 
@@ -138,6 +138,35 @@ export function RegisterForm({ defaultRole }: { defaultRole?: Role }) {
           />
         </div>
       </fieldset>
+
+      <div>
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            name="acceptTerms"
+            required
+            aria-describedby={errors.acceptTerms ? 'acceptTerms-erreur' : undefined}
+            className="accent-brand-700 mt-1 h-6 w-6 shrink-0"
+          />
+          <span>
+            J’ai lu et j’accepte les{' '}
+            <Link href="/cgu" className="link" target="_blank">
+              conditions d’utilisation
+            </Link>
+            , notamment les règles de sécurité.
+          </span>
+        </label>
+        <FieldErrors id="acceptTerms-erreur" errors={errors.acceptTerms} />
+      </div>
+
+      <p className="text-ink-soft text-sm">
+        Vos informations servent uniquement à créer votre compte et à vous mettre en relation avec des voisins. Vous
+        pouvez les télécharger ou supprimer votre compte à tout moment. Pour en savoir plus :{' '}
+        <Link href="/confidentialite" className="link" target="_blank">
+          politique de confidentialité
+        </Link>
+        .
+      </p>
 
       <SubmitButton className="btn btn-primary btn-lg w-full" pendingLabel="Création du compte…">
         Créer mon compte

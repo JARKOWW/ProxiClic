@@ -1,8 +1,7 @@
-import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { FALLBACK_ANSWER, findAnswer, KNOWLEDGE } from '@/lib/assistant-knowledge';
-import { rateLimit } from '@/lib/rate-limit';
+import { clientIp, rateLimit } from '@/lib/rate-limit';
 
 /**
  * Assistant d'aide.
@@ -14,6 +13,31 @@ import { rateLimit } from '@/lib/rate-limit';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const DEFAULT_MODEL = 'openai/gpt-oss-120b';
 const MAX_TURNS = 10;
+/** Plafond global d'appels à Groq par jour (protège le quota et la facturation du compte Groq). */
+const DAILY_AI_LIMIT = Number(process.env.GROQ_DAILY_LIMIT) || 500;
+
+/**
+ * Minimisation des données (RGPD art. 5) : on masque ce qui ressemble à une adresse e-mail, un numéro de
+ * téléphone ou une longue suite de chiffres (carte bancaire, IBAN, code) avant tout envoi à Groq (États-Unis).
+ */
+function maskPersonalData(text: string): string {
+  return text
+    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '[adresse e-mail masquée]')
+    .replace(/\bFR\d{2}(?:[ ]?[A-Z0-9]{4}){5,6}\b/gi, '[IBAN masqué]')
+    .replace(/(?:\+33|0)\s?[1-9](?:[\s.-]?\d{2}){4}/g, '[numéro masqué]')
+    .replace(/\d(?:[\s-]?\d){5,}/g, '[chiffres masqués]');
+}
+
+/** Refuse les appels venant d'un autre site (la route ne sert qu'à la fenêtre d'aide de Proxi'Clic). */
+function sameOrigin(request: Request): boolean {
+  const origin = request.headers.get('origin');
+  if (!origin) return request.headers.get('sec-fetch-site') !== 'cross-site';
+  try {
+    return new URL(origin).host === (request.headers.get('x-forwarded-host') ?? request.headers.get('host'));
+  } catch {
+    return false;
+  }
+}
 
 const bodySchema = z.object({
   messages: z
@@ -66,9 +90,10 @@ async function askGroq(messages: z.infer<typeof bodySchema>['messages'], apiKey:
 }
 
 export async function POST(request: Request) {
-  const h = await headers();
-  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'local';
-  const limit = rateLimit(`assistant:${ip}`, 20, 10 * 60_000);
+  if (!sameOrigin(request)) {
+    return NextResponse.json({ answer: 'Requête refusée.', source: 'error' }, { status: 403 });
+  }
+  const limit = await rateLimit(`assistant:${await clientIp()}`, 20, 10 * 60_000);
   if (!limit.allowed) {
     return NextResponse.json(
       { answer: `Vous avez posé beaucoup de questions. Réessayez dans ${limit.retryAfterMin} minutes.`, source: 'limit' },
@@ -80,11 +105,14 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ answer: 'Votre question est vide ou trop longue.', source: 'error' }, { status: 400 });
   }
-  const messages = parsed.data.messages.slice(-MAX_TURNS * 2);
+  const messages = parsed.data.messages
+    .slice(-MAX_TURNS * 2)
+    .map((m) => ({ ...m, content: maskPersonalData(m.content) }));
   const question = messages.findLast((m) => m.role === 'user')?.content ?? '';
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (apiKey) {
+  const day = new Date().toISOString().slice(0, 10);
+  if (apiKey && (await rateLimit(`assistant-ai:${day}`, DAILY_AI_LIMIT, 86_400_000)).allowed) {
     try {
       const answer = await askGroq(messages, apiKey);
       if (answer) return NextResponse.json({ answer, source: 'ai' });

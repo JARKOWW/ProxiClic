@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AccountSections } from '@/components/AccountSections';
 import { ProfileForm } from '@/components/ProfileForm';
 import { formatRating, Stars } from '@/components/ui';
 import { requireUser } from '@/lib/auth';
@@ -75,6 +76,8 @@ export default async function ProfilePage() {
       <div className="card mt-6">
         <ProfileForm user={user} />
       </div>
+
+      <AccountSections />
     </div>
   );
 }

@@ -42,7 +42,8 @@ export default async function RequestsFeedPage({ searchParams }: { searchParams:
       <Flash code={ok} />
       <h1 className="page-title">Demandes d’aide</h1>
       <p className="page-lead">
-        {everywhere ? 'Toutes les demandes en attente d’un aidant.' : `Les demandes en attente d’un aidant à ${user.city}.`}
+        {everywhere ? 'Toutes les demandes en attente d’un aidant.' : `Les demandes en attente d’un aidant à ${user.city}.`}{' '}
+        Celles de votre quartier d’abord, puis de la plus récente à la plus ancienne.
       </p>
 
       <form method="get" className="card mt-6 flex flex-col gap-4 sm:flex-row sm:items-end">

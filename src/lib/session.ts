@@ -12,9 +12,14 @@ function secretKey(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
-/** Crée un jeton signé et le dépose dans un cookie HttpOnly. */
-export async function createSession(userId: number): Promise<void> {
-  const token = await new SignJWT({})
+export type SessionPayload = { userId: number; version: number };
+
+/**
+ * Crée un jeton signé et le dépose dans un cookie HttpOnly.
+ * `version` reprend users.session_version : l'augmenter côté base invalide tous les jetons existants.
+ */
+export async function createSession(userId: number, version: number): Promise<void> {
+  const token = await new SignJWT({ v: version })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(String(userId))
     .setIssuedAt()
@@ -30,14 +35,15 @@ export async function createSession(userId: number): Promise<void> {
   });
 }
 
-/** Renvoie l'identifiant de l'utilisateur connecté, ou null si la session est absente ou invalide. */
-export async function readSession(): Promise<number | null> {
+/** Renvoie l'utilisateur et la version de session du jeton, ou null si la session est absente ou invalide. */
+export async function readSession(): Promise<SessionPayload | null> {
   const token = (await cookies()).get(COOKIE_NAME)?.value;
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secretKey(), { algorithms: ['HS256'] });
-    const id = Number(payload.sub);
-    return Number.isInteger(id) && id > 0 ? id : null;
+    const userId = Number(payload.sub);
+    const version = typeof payload.v === 'number' ? payload.v : 0;
+    return Number.isInteger(userId) && userId > 0 ? { userId, version } : null;
   } catch {
     return null;
   }

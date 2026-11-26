@@ -3,13 +3,15 @@ import { logout } from '@/actions/auth';
 import { setSimpleView } from '@/actions/profile';
 import { SIMPLE_HOME, usesSimpleView, type SessionUser } from '@/lib/auth';
 import { APP_NAME, APP_TAGLINE } from '@/lib/constants';
+import { hasDemoData } from '@/lib/stats';
 import { Logo, LogoMark } from './Logo';
 import { NavLink } from './NavLink';
 import { RoleSync } from './RoleSync';
 
 type NavItem = { href: string; label: string; badge?: number; live?: boolean };
 
-export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?: number }) {
+export async function Header({ user, unread = 0 }: { user: SessionUser | null; unread?: number }) {
+  const demo = await hasDemoData();
   const simple = user ? usesSimpleView(user) : false;
   const links: NavItem[] = !user
     ? []
@@ -25,6 +27,12 @@ export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?
       ];
 
   return (
+    <>
+    {demo && (
+      <p role="note" className="bg-ink px-4 py-2 text-center text-sm font-bold text-white">
+        Site de démonstration : les membres, les avis et les chiffres affichés sont fictifs.
+      </p>
+    )}
     <header className="top-0 z-40 px-3 pt-3 sm:px-4 lg:sticky">
       <RoleSync role={user?.role ?? null} simple={simple} />
       <div className="border-line shadow-soft mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-[2rem] border bg-white/95 px-4 py-2.5 backdrop-blur sm:px-5">
@@ -73,6 +81,7 @@ export function Header({ user, unread = 0 }: { user: SessionUser | null; unread?
         )}
       </div>
     </header>
+    </>
   );
 }
 
@@ -89,11 +98,20 @@ export function Footer() {
         </div>
         <div className="space-y-2 sm:text-right">
           <p>L&apos;entraide numérique entre voisins, tout simplement.</p>
-          <p>
-            <Link href="/accessibilite" className="font-bold text-white underline underline-offset-4">
-              Accessibilité : non conforme
-            </Link>
-          </p>
+          <ul className="flex flex-wrap gap-x-5 gap-y-1 sm:justify-end">
+            {[
+              { href: '/mentions-legales', label: 'Mentions légales' },
+              { href: '/confidentialite', label: 'Confidentialité' },
+              { href: '/cgu', label: 'Conditions d’utilisation' },
+              { href: '/accessibilite', label: 'Accessibilité : non conforme' },
+            ].map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="font-bold text-white underline underline-offset-4">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </footer>

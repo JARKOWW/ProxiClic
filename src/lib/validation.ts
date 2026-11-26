@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ageFrom, MAX_AGE, MIN_AGE, simpleViewForAge } from './age';
+import { ageFrom, HELPER_MIN_AGE, MAX_AGE, MIN_AGE, simpleViewForAge } from './age';
 import { CATEGORY_KEYS, DURATIONS, REVIEW_TAG_KEYS, ROLES } from './constants';
 
 /** État renvoyé par les actions serveur aux formulaires. */
@@ -34,6 +34,7 @@ export function fieldErrorsWithBirthDate(error: z.ZodError, values: Record<strin
   if (!errors.birthDate && !(optional && empty)) {
     const birth = parseBirthDate(values);
     if ('error' in birth) errors.birthDate = [birth.error];
+    else if (values.role === 'helper' && ageFrom(birth.date) < HELPER_MIN_AGE) errors.birthDate = [helperAgeError];
   }
   return errors;
 }
@@ -60,9 +61,15 @@ const email = z
   .max(254, "L'adresse e-mail est trop longue.")
   .pipe(z.email('Veuillez saisir une adresse e-mail valide, par exemple nom@exemple.fr.'));
 
-const password = z
+/**
+ * Règle conforme à la recommandation CNIL (délibération 2022-100) : 12 caractères minimum,
+ * avec une limitation des tentatives de connexion (voir lib/rate-limit.ts).
+ */
+export const PASSWORD_MIN_LENGTH = 12;
+
+export const password = z
   .string({ error: 'Le mot de passe est obligatoire.' })
-  .min(8, 'Le mot de passe doit contenir au moins 8 caractères.')
+  .min(PASSWORD_MIN_LENGTH, `Le mot de passe doit contenir au moins ${PASSWORD_MIN_LENGTH} caractères.`)
   .max(72, 'Le mot de passe ne doit pas dépasser 72 caractères.')
   .regex(/[A-Za-zÀ-ÿ]/, 'Le mot de passe doit contenir au moins une lettre.')
   .regex(/\d/, 'Le mot de passe doit contenir au moins un chiffre.');
@@ -125,6 +132,9 @@ function withBirthDate<T extends BirthDateInput>(data: T, ctx: z.RefinementCtx) 
   return { ...rest, birthDate: parsed.date };
 }
 
+/** Les aidants se rendent au domicile des demandeurs : ils doivent être majeurs. */
+export const helperAgeError = `Pour aider vos voisins à domicile, vous devez avoir au moins ${HELPER_MIN_AGE} ans.`;
+
 export const registerSchema = z
   .object({
     role: z.enum(ROLES, { error: 'Veuillez choisir un type de compte.' }),
@@ -133,9 +143,30 @@ export const registerSchema = z
     password,
     ...location,
     ...birthDateFields,
+    acceptTerms: z.literal('on', {
+      error: 'Veuillez accepter les conditions d’utilisation pour créer votre compte.',
+    }),
   })
   .transform(withBirthDate)
-  .transform((data) => ({ ...data, simpleView: simpleViewForAge(data.role, data.birthDate) }));
+  .transform((data, ctx) => {
+    if (data.role === 'helper' && ageFrom(data.birthDate) < HELPER_MIN_AGE) {
+      ctx.addIssue({ code: 'custom', path: ['birthDate'], message: helperAgeError });
+      return z.NEVER;
+    }
+    const { acceptTerms: _accept, ...rest } = data;
+    return { ...rest, simpleView: simpleViewForAge(data.role, data.birthDate) };
+  });
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string({ error: 'Indiquez votre mot de passe actuel.' }).min(1, 'Indiquez votre mot de passe actuel.').max(72),
+    newPassword: password,
+    confirmPassword: z.string().optional(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    path: ['confirmPassword'],
+    error: 'Les deux nouveaux mots de passe ne sont pas identiques.',
+  });
 
 /** Demande en affichage simplifié : pas de titre à inventer, il est déduit de la catégorie et du texte. */
 export const simpleRequestSchema = z.object({
