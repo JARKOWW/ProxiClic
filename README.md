@@ -28,14 +28,7 @@ npm run dev                   # http://localhost:3000
 
 ### Demo accounts
 
-Every seeded account uses the password `Proxitech2026`.
-
-| Role | E-mail | Good for trying |
-| --- | --- | --- |
-| Demandeuse (client) | `monique.durand@example.fr` | A pending proposal to accept, a confirmed appointment, an unread message |
-| Aidant (helper) | `lucas.martin@example.fr` | The request feed, a pending proposal, past appointments |
-
-Other accounts follow the same `prenom.nom@example.fr` pattern (see `scripts/seed.ts`). All sample members live in Lyon.
+Every seeded account shares one password, taken from `SEED_PASSWORD` in `.env`. If it is empty, `npm run db:seed` generates a random one. Either way, the seed script prints the password and two handy accounts (a demandeuse and an aidant) when it finishes. The account list lives in `scripts/seed.ts`. All sample members live in Lyon.
 
 ## Environment variables
 
